@@ -29,8 +29,10 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "apiUrl": "https://api.ma3morainventory.cloud/api"
+      "apiUrl": "https://api.ma3morainventory.cloud/api",
+      "eas": {
+        "projectId": "36eb9a7a-ad39-424a-b8aa-383777f4191d"
+      }
     }
   }
 }
-
