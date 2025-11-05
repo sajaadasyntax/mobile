@@ -58,6 +58,12 @@ export const deliveryStatusLabels: Record<string, string> = {
   NOT_DELIVERED: 'لم يتم التسليم',
 };
 
+export const paymentMethodLabels: Record<string, string> = {
+  CASH: 'نقداً',
+  BANK: 'بنك',
+  BANK_NILE: 'بنك النيل',
+};
+
 export const procOrderStatusLabels: Record<string, string> = {
   CREATED: 'تم الإنشاء',
   RECEIVED: 'تم الاستلام',

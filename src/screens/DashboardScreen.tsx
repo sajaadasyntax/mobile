@@ -195,6 +195,58 @@ export default function DashboardScreen({ navigation }: any) {
             </Button>
           </Card.Content>
         </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="cash"
+              onPress={() => navigation.navigate('LiquidCash')}
+              style={styles.actionButton}
+            >
+              التقرير النقدي السائل
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="history"
+              onPress={() => navigation.navigate('BalanceSessions')}
+              style={styles.actionButton}
+            >
+              جلسات الميزانية السابقة
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="calendar-today"
+              onPress={() => navigation.navigate('DailyReport')}
+              style={styles.actionButton}
+            >
+              التقرير اليومي
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="cash-plus"
+              onPress={() => navigation.navigate('Income')}
+              style={styles.actionButton}
+            >
+              الإيرادات الأخرى
+            </Button>
+          </Card.Content>
+        </Card>
       </View>
     </ScrollView>
   );

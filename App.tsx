@@ -10,6 +10,10 @@ import AuditLogsScreen from './src/screens/AuditLogsScreen';
 import BalanceSheetScreen from './src/screens/BalanceSheetScreen';
 import SalesReportScreen from './src/screens/SalesReportScreen';
 import ProcurementReportScreen from './src/screens/ProcurementReportScreen';
+import LiquidCashScreen from './src/screens/LiquidCashScreen';
+import BalanceSessionsScreen from './src/screens/BalanceSessionsScreen';
+import DailyReportScreen from './src/screens/DailyReportScreen';
+import IncomeScreen from './src/screens/IncomeScreen';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 const Stack = createNativeStackNavigator();
@@ -71,6 +75,26 @@ function Navigation() {
             name="ProcurementReport" 
             component={ProcurementReportScreen}
             options={{ title: 'تقرير المشتريات' }}
+          />
+          <Stack.Screen 
+            name="LiquidCash" 
+            component={LiquidCashScreen}
+            options={{ title: 'التقرير النقدي السائل' }}
+          />
+          <Stack.Screen 
+            name="BalanceSessions" 
+            component={BalanceSessionsScreen}
+            options={{ title: 'جلسات الميزانية' }}
+          />
+          <Stack.Screen 
+            name="DailyReport"
+            component={DailyReportScreen}
+            options={{ title: 'التقرير اليومي' }}
+          />
+          <Stack.Screen 
+            name="Income"
+            component={IncomeScreen}
+            options={{ title: 'الإيرادات الأخرى' }}
           />
         </>
       )}

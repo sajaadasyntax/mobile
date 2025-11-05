@@ -80,6 +80,11 @@ export const reportingAPI = {
     return response.data;
   },
   
+  getIncome: async (params?: any) => {
+    const response = await api.get('/accounting/income', { params });
+    return response.data;
+  },
+  
   getInventories: async () => {
     const response = await api.get('/inventories');
     return response.data;
@@ -87,6 +92,39 @@ export const reportingAPI = {
   
   getItems: async (section?: string) => {
     const response = await api.get('/items', { params: { section } });
+    return response.data;
+  },
+  
+  getLiquidCash: async (params?: any) => {
+    const response = await api.get('/accounting/liquid-cash', { params });
+    return response.data;
+  },
+  
+  getBalanceSessions: async () => {
+    const response = await api.get('/accounting/balance/sessions');
+    return response.data;
+  },
+  
+  getAuditLogs: async (params?: any) => {
+    const response = await api.get('/accounting/audit', { params });
+    return response.data;
+  },
+
+  // Reports
+  getSalesReports: async (params?: any) => {
+    const response = await api.get('/sales/reports', { params });
+    return response.data;
+  },
+  
+  getProcurementReports: async (params?: any) => {
+    const response = await api.get('/procurement/reports', { params });
+    return response.data;
+  },
+
+  getDailyReport: async (date?: string) => {
+    const response = await api.get('/accounting/daily-report', { 
+      params: date ? { date } : undefined 
+    });
     return response.data;
   },
 };

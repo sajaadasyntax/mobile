@@ -1,25 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-import { Card, Text, Chip, Searchbar } from 'react-native-paper';
+import { Card, Text, Chip, Searchbar, SegmentedButtons, Button } from 'react-native-paper';
 import { reportingAPI } from '../services/api';
-import { formatCurrency, formatDateTime, paymentStatusLabels, deliveryStatusLabels, sectionLabels } from '../utils/formatters';
+import { formatCurrency, formatDateTime, paymentStatusLabels, deliveryStatusLabels, sectionLabels, paymentMethodLabels } from '../utils/formatters';
 
 export default function SalesReportScreen() {
-  const [invoices, setInvoices] = useState<any[]>([]);
+  const [reportData, setReportData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [date, setDate] = useState(''); // Single date only
 
   useEffect(() => {
-    loadInvoices();
+    loadReports();
   }, []);
 
-  const loadInvoices = async () => {
+  const loadReports = async () => {
     try {
-      const data = await reportingAPI.getSalesInvoices();
-      setInvoices(data);
+      const params: any = {};
+      
+      // Single date only
+      if (date) {
+        params.date = date;
+      }
+
+      const data = await reportingAPI.getSalesReports(params);
+      setReportData(data);
     } catch (error) {
-      console.error('Error loading invoices:', error);
+      console.error('Error loading sales reports:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -28,16 +36,12 @@ export default function SalesReportScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadInvoices();
+    loadReports();
   };
 
-  const filteredInvoices = invoices.filter(invoice =>
-    invoice.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    invoice.customer?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const totalSales = filteredInvoices.reduce((sum, inv) => sum + parseFloat(inv.total), 0);
-  const totalPaid = filteredInvoices.reduce((sum, inv) => sum + parseFloat(inv.paidAmount), 0);
+  const applyDateFilter = () => {
+    loadReports();
+  };
 
   if (loading) {
     return (
@@ -49,107 +53,155 @@ export default function SalesReportScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
-          <Card.Content>
-            <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المبيعات</Text>
-            <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(totalSales)}</Text>
-            <Text variant="bodySmall" style={styles.summaryLabel}>{filteredInvoices.length} فاتورة</Text>
-          </Card.Content>
-        </Card>
+      {/* Date Filter */}
+      <Card style={styles.filterCard}>
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.filterTitle}>اختر التاريخ</Text>
+          <View style={styles.dateRow}>
+            <Button
+              mode="outlined"
+              onPress={() => {
+                const today = new Date().toISOString().split('T')[0];
+                setDate(today);
+                applyDateFilter();
+              }}
+              style={styles.dateButton}
+            >
+              اليوم
+            </Button>
+            <Button
+              mode="outlined"
+              onPress={() => {
+                const today = new Date();
+                const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+                setDate(yesterday.toISOString().split('T')[0]);
+                applyDateFilter();
+              }}
+              style={styles.dateButton}
+            >
+              أمس
+            </Button>
+          </View>
+          <Text variant="bodyMedium" style={styles.dateLabel}>
+            التاريخ المحدد: {date || 'لم يتم التحديد'}
+          </Text>
+          <Button
+            mode="contained"
+            onPress={applyDateFilter}
+            style={styles.applyButton}
+          >
+            تحديث التقرير
+          </Button>
+        </Card.Content>
+      </Card>
 
-        <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
-          <Card.Content>
-            <Text variant="bodySmall" style={styles.summaryLabel}>المحصل</Text>
-            <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(totalPaid)}</Text>
-          </Card.Content>
-        </Card>
-      </View>
+      {/* Summary Cards */}
+      {reportData?.summary && (
+        <View style={styles.summaryRow}>
+          <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
+            <Card.Content>
+              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الفواتير</Text>
+              <Text variant="headlineSmall" style={styles.summaryValue}>{reportData.summary.totalInvoices}</Text>
+            </Card.Content>
+          </Card>
 
-      <Searchbar
-        placeholder="بحث بالفاتورة أو العميل..."
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-        style={styles.searchBar}
-      />
+          <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
+            <Card.Content>
+              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المبيعات</Text>
+              <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(reportData.summary.totalSales)}</Text>
+            </Card.Content>
+          </Card>
+        </View>
+      )}
 
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View style={styles.invoicesContainer}>
-          {filteredInvoices.map((invoice) => (
-            <Card key={invoice.id} style={styles.invoiceCard}>
+        <View style={styles.reportsContainer}>
+          {reportData?.data?.map((periodData: any, index: number) => (
+            <Card key={index} style={styles.periodCard}>
               <Card.Content>
-                <View style={styles.invoiceHeader}>
-                  <Text variant="titleMedium" style={styles.invoiceNumber}>
-                    {invoice.invoiceNumber}
+                <View style={styles.periodHeader}>
+                  <Text variant="titleMedium" style={styles.periodTitle}>
+                    {formatDateTime(periodData.date || date)}
                   </Text>
-                  <Text variant="bodySmall" style={styles.timestamp}>
-                    {formatDateTime(invoice.createdAt)}
+                  <Text variant="bodySmall" style={styles.periodStats}>
+                    {periodData.invoiceCount} فاتورة - {formatCurrency(periodData.totalSales)}
                   </Text>
                 </View>
 
-                <View style={styles.invoiceDetails}>
-                  <View style={styles.detailRow}>
-                    <Text variant="bodySmall" style={styles.label}>العميل:</Text>
-                    <Text variant="bodyMedium">{invoice.customer?.name}</Text>
-                  </View>
-
-                  <View style={styles.detailRow}>
-                    <Text variant="bodySmall" style={styles.label}>القسم:</Text>
-                    <Text variant="bodyMedium">{sectionLabels[invoice.section]}</Text>
-                  </View>
-
+                {/* Payment Methods */}
+                <View style={styles.section}>
+                  <Text variant="titleSmall" style={styles.sectionTitle}>طرق الدفع</Text>
                   <View style={styles.chipRow}>
-                    <Chip
-                      mode="flat"
-                      style={[
-                        styles.chip,
-                        { backgroundColor: invoice.paymentStatus === 'PAID' ? '#10b981' : invoice.paymentStatus === 'PARTIAL' ? '#f97316' : '#ef4444' }
-                      ]}
-                      textStyle={styles.chipText}
-                    >
-                      {paymentStatusLabels[invoice.paymentStatus]}
-                    </Chip>
-
-                    <Chip
-                      mode="flat"
-                      style={[
-                        styles.chip,
-                        { backgroundColor: invoice.deliveryStatus === 'DELIVERED' ? '#10b981' : '#f97316' }
-                      ]}
-                      textStyle={styles.chipText}
-                    >
-                      {deliveryStatusLabels[invoice.deliveryStatus]}
-                    </Chip>
+                    {Object.entries(periodData.paymentMethods).map(([method, data]: [string, any]) => (
+                      <Chip
+                        key={method}
+                        mode="flat"
+                        style={styles.chip}
+                        textStyle={styles.chipText}
+                      >
+                        {paymentMethodLabels[method]}: {data.count}
+                      </Chip>
+                    ))}
                   </View>
+                </View>
 
-                  <View style={styles.amountRow}>
-                    <View style={styles.amountItem}>
-                      <Text variant="bodySmall" style={styles.label}>المجموع</Text>
-                      <Text variant="titleMedium" style={styles.total}>
-                        {formatCurrency(invoice.total)}
+                {/* Items Summary */}
+                <View style={styles.section}>
+                  <Text variant="titleSmall" style={styles.sectionTitle}>الأصناف المباعة</Text>
+                  {Object.entries(periodData.items).slice(0, 5).map(([itemName, itemData]: [string, any]) => (
+                    <View key={itemName} style={styles.itemRow}>
+                      <Text variant="bodyMedium" style={styles.itemName}>{itemName}</Text>
+                      <Text variant="bodySmall" style={styles.itemDetails}>
+                        {itemData.quantity} × {formatCurrency(itemData.unitPrice)} = {formatCurrency(itemData.totalAmount)}
                       </Text>
                     </View>
+                  ))}
+                  {Object.keys(periodData.items).length > 5 && (
+                    <Text variant="bodySmall" style={styles.moreItems}>
+                      و {Object.keys(periodData.items).length - 5} صنف آخر...
+                    </Text>
+                  )}
+                </View>
 
-                    <View style={styles.amountItem}>
-                      <Text variant="bodySmall" style={styles.label}>المدفوع</Text>
-                      <Text variant="titleMedium" style={styles.paid}>
-                        {formatCurrency(invoice.paidAmount)}
+                {/* Recent Invoices */}
+                <View style={styles.section}>
+                  <Text variant="titleSmall" style={styles.sectionTitle}>آخر الفواتير</Text>
+                  {periodData.invoices.slice(0, 3).map((invoice: any) => (
+                    <View key={invoice.id} style={styles.invoiceRow}>
+                      <Text variant="bodyMedium" style={styles.invoiceNumber}>
+                        {invoice.invoiceNumber}
                       </Text>
-                    </View>
-
-                    {parseFloat(invoice.total) - parseFloat(invoice.paidAmount) > 0 && (
-                      <View style={styles.amountItem}>
-                        <Text variant="bodySmall" style={styles.label}>المتبقي</Text>
-                        <Text variant="titleMedium" style={styles.remaining}>
-                          {formatCurrency(parseFloat(invoice.total) - parseFloat(invoice.paidAmount))}
-                        </Text>
+                      <Text variant="bodySmall" style={styles.invoiceDetails}>
+                        {invoice.customer.name} - {formatCurrency(invoice.total)}
+                      </Text>
+                      <View style={styles.invoiceChips}>
+                        <Chip
+                          mode="flat"
+                          style={[
+                            styles.statusChip,
+                            { backgroundColor: invoice.paymentStatus === 'PAID' ? '#10b981' : invoice.paymentStatus === 'PARTIAL' ? '#f97316' : '#ef4444' }
+                          ]}
+                          textStyle={styles.chipText}
+                        >
+                          {paymentStatusLabels[invoice.paymentStatus]}
+                        </Chip>
+                        <Chip
+                          mode="flat"
+                          style={[
+                            styles.statusChip,
+                            { backgroundColor: invoice.deliveryStatus === 'DELIVERED' ? '#10b981' : '#f97316' }
+                          ]}
+                          textStyle={styles.chipText}
+                        >
+                          {deliveryStatusLabels[invoice.deliveryStatus]}
+                        </Chip>
                       </View>
-                    )}
-                  </View>
+                    </View>
+                  ))}
                 </View>
               </Card.Content>
             </Card>
@@ -171,10 +223,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
+    padding: 16,
+    paddingBottom: 8,
+  },
+  segmentedButtons: {
+    marginBottom: 8,
+  },
+  filterCard: {
+    margin: 16,
+    marginTop: 0,
+    marginBottom: 8,
+  },
+  filterTitle: {
+    marginBottom: 12,
+    fontWeight: 'bold',
+  },
+  dateRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  dateButton: {
+    flex: 1,
+  },
+  applyButton: {
+    marginTop: 8,
+  },
+  dateLabel: {
+    marginTop: 12,
+    marginBottom: 8,
+    color: '#666',
+    textAlign: 'center',
+  },
+  summaryRow: {
     flexDirection: 'row',
     gap: 12,
     padding: 16,
-    paddingBottom: 0,
+    paddingTop: 0,
   },
   summaryCard: {
     flex: 1,
@@ -189,46 +274,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 4,
   },
-  searchBar: {
-    margin: 16,
-    elevation: 2,
-  },
-  invoicesContainer: {
+  reportsContainer: {
     padding: 16,
     paddingTop: 0,
   },
-  invoiceCard: {
-    marginBottom: 12,
+  periodCard: {
+    marginBottom: 16,
     borderRadius: 8,
   },
-  invoiceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+  periodHeader: {
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
   },
-  invoiceNumber: {
+  periodTitle: {
     fontWeight: 'bold',
     color: '#2563eb',
+    marginBottom: 4,
   },
-  timestamp: {
+  periodStats: {
     color: '#666',
   },
-  invoiceDetails: {
-    gap: 8,
+  section: {
+    marginBottom: 16,
   },
-  detailRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  label: {
-    color: '#666',
-    fontWeight: '600',
+  sectionTitle: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#374151',
   },
   chipRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
-    marginTop: 4,
   },
   chip: {
     alignSelf: 'flex-start',
@@ -237,28 +316,49 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 11,
   },
-  amountRow: {
+  itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-  },
-  amountItem: {
     alignItems: 'center',
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
   },
-  total: {
+  itemName: {
+    flex: 1,
+    fontWeight: '500',
+  },
+  itemDetails: {
+    color: '#666',
+    fontSize: 12,
+  },
+  moreItems: {
+    textAlign: 'center',
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 8,
+  },
+  invoiceRow: {
+    backgroundColor: '#f9fafb',
+    padding: 12,
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+  invoiceNumber: {
+    fontWeight: 'bold',
     color: '#2563eb',
-    fontWeight: 'bold',
+    marginBottom: 4,
   },
-  paid: {
-    color: '#10b981',
-    fontWeight: 'bold',
+  invoiceDetails: {
+    color: '#666',
+    marginBottom: 8,
   },
-  remaining: {
-    color: '#ef4444',
-    fontWeight: 'bold',
+  invoiceChips: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  statusChip: {
+    alignSelf: 'flex-start',
   },
 });
 

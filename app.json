@@ -4,30 +4,25 @@
     "slug": "ma3mora-auditor",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "platforms": ["ios", "android"],
+    "sdkVersion": "51.0.0",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2563eb",
+      "resizeMode": "contain"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ma3mora.auditor"
     },
     "android": {
+      "package": "com.ma3mora.auditor",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2563eb"
       },
-      "package": "com.ma3mora.auditor"
+      "permissions": []
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
+    "plugins": [],
     "extra": {
       "apiUrl": "https://api.ma3morainventory.cloud/api",
       "eas": {
