@@ -113,6 +113,8 @@ export default function OutstandingFeesScreen() {
       )}
 
       <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -208,6 +210,12 @@ const styles = StyleSheet.create({
   periodButton: {
     flex: 1,
     minWidth: '22%',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   summaryRow: {
     flexDirection: 'row',

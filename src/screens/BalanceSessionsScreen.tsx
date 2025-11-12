@@ -51,6 +51,7 @@ export default function BalanceSessionsScreen({ navigation }: any) {
   return (
     <ScrollView 
       style={styles.container}
+      contentContainerStyle={styles.contentContainer}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -93,7 +94,7 @@ export default function BalanceSessionsScreen({ navigation }: any) {
                   تاريخ الفتح: {formatDateTime(session.openedAt)}
                 </Text>
                 <Text variant="bodyMedium" style={styles.infoText}>
-                  تاريخ الإقفال: {session.closedAt ? formatDateTime(session.closedAt) : 'غير محدد'}
+                  تاريخ الإقفال: {session.closedAt ? formatDateTime(session.closedAt) : 'لم يتم الإقفال بعد'}
                 </Text>
                 {session.notes && (
                   <Text variant="bodyMedium" style={styles.infoText}>
@@ -174,6 +175,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+  },
+  contentContainer: {
+    paddingBottom: 20,
   },
   center: {
     flex: 1,

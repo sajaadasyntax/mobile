@@ -4,8 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
-  Alert,
   ActivityIndicator,
   TextInput,
 } from 'react-native';
@@ -87,29 +85,6 @@ export default function DailyReportScreen() {
     loadDailyReport(date);
   };
 
-  const generatePDF = () => {
-    if (!reportData) return;
-    
-    // For mobile, we'll use the web API to generate PDF
-    const pdfUrl = `${API_URL}/accounting/daily-report/pdf?date=${selectedDate}`;
-    
-    // Open PDF in browser or download
-    Alert.alert(
-      'تصدير PDF',
-      'سيتم فتح التقرير في المتصفح',
-      [
-        { text: 'إلغاء', style: 'cancel' },
-        { 
-          text: 'فتح', 
-          onPress: () => {
-            // This would open the PDF URL in the device's browser
-            // For React Native, you might need to use Linking.openURL
-            console.log('Opening PDF:', pdfUrl);
-          }
-        }
-      ]
-    );
-  };
 
   if (loading) {
     return (
@@ -129,7 +104,10 @@ export default function DailyReportScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>التقرير اليومي</Text>
         <TextInput
@@ -138,9 +116,6 @@ export default function DailyReportScreen() {
           onChangeText={handleDateChange}
           placeholder="YYYY-MM-DD"
         />
-        <TouchableOpacity style={styles.pdfButton} onPress={generatePDF}>
-          <Text style={styles.pdfButtonText}>📄 تصدير PDF</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Sales Summary */}
@@ -304,6 +279,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  contentContainer: {
+    paddingBottom: 20,
+  },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -329,30 +307,21 @@ const styles = StyleSheet.create({
     width: '80%',
     textAlign: 'center',
   },
-  pdfButton: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  pdfButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
   section: {
-    margin: 15,
+    margin: 12,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#374151',
-    marginBottom: 10,
+    marginBottom: 12,
     textAlign: 'right',
   },
   summaryCard: {
     backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
+    padding: 12,
+    borderRadius: 8,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -363,7 +332,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
@@ -392,9 +361,9 @@ const styles = StyleSheet.create({
   },
   detailCard: {
     backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
     elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },

@@ -115,6 +115,8 @@ export default function SalesReportScreen() {
       )}
 
       <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -240,11 +242,19 @@ const styles = StyleSheet.create({
   },
   dateRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginBottom: 12,
   },
   dateButton: {
     flex: 1,
+    minWidth: '45%',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   applyButton: {
     marginTop: 8,
@@ -279,8 +289,9 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   periodCard: {
-    marginBottom: 16,
+    marginBottom: 12,
     borderRadius: 8,
+    elevation: 2,
   },
   periodHeader: {
     marginBottom: 16,
@@ -340,9 +351,9 @@ const styles = StyleSheet.create({
   },
   invoiceRow: {
     backgroundColor: '#f9fafb',
-    padding: 12,
+    padding: 10,
     borderRadius: 6,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   invoiceNumber: {
     fontWeight: 'bold',

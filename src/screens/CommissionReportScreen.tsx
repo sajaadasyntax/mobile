@@ -109,6 +109,8 @@ export default function CommissionReportScreen() {
       )}
 
       <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -119,7 +121,7 @@ export default function CommissionReportScreen() {
               <Card.Content>
                 <View style={styles.commissionHeader}>
                   <Text variant="titleMedium" style={styles.orderNumber}>
-                    {commission.orderNumber || 'N/A'}
+                    {commission.orderNumber || 'غير متوفر'}
                   </Text>
                   <Text variant="headlineSmall" style={styles.amount}>
                     {formatCurrency(commission.amount)}
@@ -128,7 +130,7 @@ export default function CommissionReportScreen() {
 
                 <View style={styles.commissionDetails}>
                   <Text variant="bodyMedium" style={styles.detailText}>
-                    المورد: {commission.supplier || 'غير محدد'}
+                    المورد: {commission.supplier || 'غير متوفر'}
                   </Text>
                   <Text variant="bodySmall" style={styles.detailText}>
                     {formatDateTime(commission.date)}
@@ -189,11 +191,19 @@ const styles = StyleSheet.create({
   },
   dateRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginBottom: 12,
   },
   dateButton: {
     flex: 1,
+    minWidth: '45%',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   applyButton: {
     marginTop: 8,

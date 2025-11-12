@@ -116,6 +116,8 @@ export default function CustomerReportScreen() {
       )}
 
       <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -135,7 +137,7 @@ export default function CustomerReportScreen() {
 
                 <View style={styles.invoiceDetails}>
                   <Text variant="bodyMedium" style={styles.detailText}>
-                    العميل: {invoice.customer || 'بدون عميل'}
+                    العميل: {invoice.customer || 'عميل عام'}
                   </Text>
                   <Text variant="bodySmall" style={styles.detailText}>
                     {formatDateTime(invoice.date)}
@@ -227,11 +229,19 @@ const styles = StyleSheet.create({
   },
   dateRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginBottom: 12,
   },
   dateButton: {
     flex: 1,
+    minWidth: '45%',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   applyButton: {
     marginTop: 8,
@@ -262,6 +272,7 @@ const styles = StyleSheet.create({
   invoiceCard: {
     marginBottom: 12,
     borderRadius: 8,
+    elevation: 2,
   },
   invoiceHeader: {
     flexDirection: 'row',
