@@ -59,7 +59,7 @@ export default function DashboardScreen({ navigation }: any) {
             مرحباً، {user?.username}
           </Text>
           <Text variant="bodyMedium" style={styles.role}>
-            مراجع عام
+            {user?.role === 'AUDITOR' ? 'مراجع عام' : user?.role === 'ACCOUNTANT' ? 'محاسب' : 'مدير'}
           </Text>
         </View>
         <IconButton
@@ -141,6 +141,23 @@ export default function DashboardScreen({ navigation }: any) {
       {/* Quick Actions */}
       <View style={styles.actionsContainer}>
         <Text variant="titleLarge" style={styles.sectionTitle}>
+          المخازن
+        </Text>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="warehouse"
+              onPress={() => navigation.navigate('Inventory')}
+              style={styles.actionButton}
+            >
+              المخازن والمخزون
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Text variant="titleLarge" style={styles.sectionTitle}>
           التقارير
         </Text>
 
@@ -200,6 +217,19 @@ export default function DashboardScreen({ navigation }: any) {
           <Card.Content>
             <Button
               mode="contained"
+              icon="account"
+              onPress={() => navigation.navigate('CustomerReport')}
+              style={styles.actionButton}
+            >
+              تقرير العملاء
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
               icon="cash"
               onPress={() => navigation.navigate('LiquidCash')}
               style={styles.actionButton}
@@ -244,6 +274,71 @@ export default function DashboardScreen({ navigation }: any) {
               style={styles.actionButton}
             >
               الإيرادات الأخرى
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="account-alert"
+              onPress={() => navigation.navigate('OutstandingFees')}
+              style={styles.actionButton}
+            >
+              تقرير المتأخرات
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="percent"
+              onPress={() => navigation.navigate('CommissionReport')}
+              style={styles.actionButton}
+            >
+              تقرير العمولات
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="chart-line"
+              onPress={() => navigation.navigate('DailyIncomeLoss')}
+              style={styles.actionButton}
+            >
+              الإيرادات والمنصرفات
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="bank"
+              onPress={() => navigation.navigate('BankTransactions')}
+              style={styles.actionButton}
+            >
+              المعاملات البنكية
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="scale-balance"
+              onPress={() => navigation.navigate('AssetsLiabilities')}
+              style={styles.actionButton}
+            >
+              له و عليه (الأصول والالتزامات)
             </Button>
           </Card.Content>
         </Card>

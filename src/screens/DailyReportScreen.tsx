@@ -9,8 +9,11 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
+import Constants from 'expo-constants';
 import { reportingAPI } from '../services/api';
 import { formatCurrency, formatDate } from '../utils/formatters';
+
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:4000/api';
 
 interface DailyReportData {
   date: string;
@@ -88,7 +91,7 @@ export default function DailyReportScreen() {
     if (!reportData) return;
     
     // For mobile, we'll use the web API to generate PDF
-    const pdfUrl = `${api.baseURL}/api/accounting/daily-report/pdf?date=${selectedDate}`;
+    const pdfUrl = `${API_URL}/accounting/daily-report/pdf?date=${selectedDate}`;
     
     // Open PDF in browser or download
     Alert.alert(

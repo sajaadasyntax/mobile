@@ -8,6 +8,14 @@ export const formatCurrency = (amount: number | string): string => {
   }).format(num);
 };
 
+export const formatNumber = (num: number | string): string => {
+  const number = typeof num === 'string' ? parseFloat(num) : num;
+  return new Intl.NumberFormat('ar-SD', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(number);
+};
+
 export const formatDate = (date: string | Date): string => {
   return new Intl.DateTimeFormat('ar-SD', {
     year: 'numeric',
@@ -36,6 +44,8 @@ export const formatTime = (date: string | Date): string => {
 export const roleLabels: Record<string, string> = {
   SALES_GROCERY: 'مبيعات بقالة',
   SALES_BAKERY: 'مبيعات أفران',
+  AGENT_GROCERY: 'وكيل بقالة',
+  AGENT_BAKERY: 'وكيل أفران',
   INVENTORY: 'مخازن',
   PROCUREMENT: 'مشتريات',
   ACCOUNTANT: 'محاسب',
@@ -56,6 +66,8 @@ export const paymentStatusLabels: Record<string, string> = {
 export const deliveryStatusLabels: Record<string, string> = {
   DELIVERED: 'تم التسليم',
   NOT_DELIVERED: 'لم يتم التسليم',
+  PARTIAL: 'تسليم جزئي',
+  REJECTED: 'مرفوضة',
 };
 
 export const paymentMethodLabels: Record<string, string> = {
@@ -69,5 +81,11 @@ export const procOrderStatusLabels: Record<string, string> = {
   RECEIVED: 'تم الاستلام',
   PARTIAL: 'استلام جزئي',
   CANCELLED: 'ملغي',
+};
+
+export const customerTypeLabels: Record<string, string> = {
+  WHOLESALE: 'جملة',
+  RETAIL: 'قطاعي',
+  AGENT: 'وكيل',
 };
 

@@ -1,0 +1,295 @@
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { Card, Text, Button, Chip } from 'react-native-paper';
+import { reportingAPI } from '../services/api';
+import { formatCurrency, formatDateTime } from '../utils/formatters';
+
+export default function OutstandingFeesScreen() {
+  const [reportData, setReportData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [period, setPeriod] = useState('today');
+
+  useEffect(() => {
+    loadReports();
+  }, [period]);
+
+  const loadReports = async () => {
+    try {
+      const params: any = { period };
+      const data = await reportingAPI.getOutstandingFees(params);
+      setReportData(data);
+    } catch (error) {
+      console.error('Error loading outstanding fees:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadReports();
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loading}>
+        <Text>جاري التحميل...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Period Filter */}
+      <Card style={styles.filterCard}>
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.filterTitle}>الفترة</Text>
+          <View style={styles.periodRow}>
+            <Button
+              mode={period === 'today' ? 'contained' : 'outlined'}
+              onPress={() => setPeriod('today')}
+              style={styles.periodButton}
+              compact
+            >
+              اليوم
+            </Button>
+            <Button
+              mode={period === 'week' ? 'contained' : 'outlined'}
+              onPress={() => setPeriod('week')}
+              style={styles.periodButton}
+              compact
+            >
+              أسبوع
+            </Button>
+            <Button
+              mode={period === 'month' ? 'contained' : 'outlined'}
+              onPress={() => setPeriod('month')}
+              style={styles.periodButton}
+              compact
+            >
+              شهر
+            </Button>
+            <Button
+              mode={period === 'year' ? 'contained' : 'outlined'}
+              onPress={() => setPeriod('year')}
+              style={styles.periodButton}
+              compact
+            >
+              سنة
+            </Button>
+          </View>
+        </Card.Content>
+      </Card>
+
+      {/* Summary */}
+      {reportData?.summary && (
+        <View style={styles.summaryRow}>
+          <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
+            <Card.Content>
+              <Text variant="bodySmall" style={styles.summaryLabel}>ذمم العملاء</Text>
+              <Text variant="headlineSmall" style={styles.summaryValue}>
+                {formatCurrency(reportData.summary.customersOwesUs || 0)}
+              </Text>
+              <Text variant="bodySmall" style={styles.summaryCount}>
+                {reportData.summary.totalCustomersOutstanding || 0} عميل
+              </Text>
+            </Card.Content>
+          </Card>
+
+          <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
+            <Card.Content>
+              <Text variant="bodySmall" style={styles.summaryLabel}>ذمم الموردين</Text>
+              <Text variant="headlineSmall" style={styles.summaryValue}>
+                {formatCurrency(reportData.summary.weOweSuppliers || 0)}
+              </Text>
+              <Text variant="bodySmall" style={styles.summaryCount}>
+                {reportData.summary.totalSuppliersOutstanding || 0} مورد
+              </Text>
+            </Card.Content>
+          </Card>
+        </View>
+      )}
+
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.reportsContainer}>
+          {/* Customers */}
+          {reportData?.customers && reportData.customers.length > 0 && (
+            <>
+              <Text variant="titleLarge" style={styles.sectionHeader}>العملاء</Text>
+              {reportData.customers.map((customer: any) => (
+                <Card key={customer.id} style={styles.customerCard}>
+                  <Card.Content>
+                    <View style={styles.customerHeader}>
+                      <Text variant="titleMedium" style={styles.customerName}>
+                        {customer.name}
+                      </Text>
+                      <Text variant="headlineSmall" style={styles.outstandingAmount}>
+                        {formatCurrency(customer.outstanding)}
+                      </Text>
+                    </View>
+                    <Text variant="bodySmall" style={styles.customerDetails}>
+                      {customer.invoiceCount} فاتورة
+                    </Text>
+                  </Card.Content>
+                </Card>
+              ))}
+            </>
+          )}
+
+          {/* Suppliers */}
+          {reportData?.suppliers && reportData.suppliers.length > 0 && (
+            <>
+              <Text variant="titleLarge" style={styles.sectionHeader}>الموردين</Text>
+              {reportData.suppliers.map((supplier: any) => (
+                <Card key={supplier.id} style={styles.supplierCard}>
+                  <Card.Content>
+                    <View style={styles.supplierHeader}>
+                      <Text variant="titleMedium" style={styles.supplierName}>
+                        {supplier.name}
+                      </Text>
+                      <Text variant="headlineSmall" style={styles.outstandingAmount}>
+                        {formatCurrency(supplier.outstanding)}
+                      </Text>
+                    </View>
+                    <Text variant="bodySmall" style={styles.supplierDetails}>
+                      {supplier.orderCount} أمر شراء
+                    </Text>
+                  </Card.Content>
+                </Card>
+              ))}
+            </>
+          )}
+
+          {(!reportData?.customers || reportData.customers.length === 0) &&
+            (!reportData?.suppliers || reportData.suppliers.length === 0) && (
+              <Card style={styles.emptyCard}>
+                <Card.Content>
+                  <Text variant="bodyMedium" style={styles.emptyText}>
+                    لا توجد ذمم متأخرة للفترة المحددة
+                  </Text>
+                </Card.Content>
+              </Card>
+            )}
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterCard: {
+    margin: 16,
+    marginBottom: 8,
+  },
+  filterTitle: {
+    marginBottom: 12,
+    fontWeight: 'bold',
+  },
+  periodRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  periodButton: {
+    flex: 1,
+    minWidth: '22%',
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: 12,
+    padding: 16,
+    paddingTop: 0,
+  },
+  summaryCard: {
+    flex: 1,
+    borderRadius: 8,
+  },
+  summaryLabel: {
+    color: 'white',
+    opacity: 0.9,
+  },
+  summaryValue: {
+    color: 'white',
+    fontWeight: 'bold',
+    marginTop: 4,
+  },
+  summaryCount: {
+    color: 'white',
+    opacity: 0.8,
+    marginTop: 4,
+    fontSize: 11,
+  },
+  reportsContainer: {
+    padding: 16,
+    paddingTop: 0,
+  },
+  sectionHeader: {
+    fontWeight: 'bold',
+    marginBottom: 12,
+    marginTop: 8,
+    color: '#374151',
+  },
+  customerCard: {
+    marginBottom: 12,
+    borderRadius: 8,
+    backgroundColor: '#dbeafe',
+  },
+  customerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  customerName: {
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  outstandingAmount: {
+    fontWeight: 'bold',
+    color: '#2563eb',
+  },
+  customerDetails: {
+    color: '#666',
+  },
+  supplierCard: {
+    marginBottom: 12,
+    borderRadius: 8,
+    backgroundColor: '#fee2e2',
+  },
+  supplierHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  supplierName: {
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  supplierDetails: {
+    color: '#666',
+  },
+  emptyCard: {
+    marginTop: 16,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#666',
+  },
+});
+

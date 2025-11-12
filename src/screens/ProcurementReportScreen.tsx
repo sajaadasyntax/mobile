@@ -152,7 +152,7 @@ export default function ProcurementReportScreen() {
                 <View style={styles.periodHeader}>
                   <Text variant="titleMedium" style={styles.periodTitle}>
                     {period === 'daily' 
-                      ? formatDateTime(periodData.date, 'date')
+                      ? formatDateTime(periodData.date)
                       : periodData.month
                     }
                   </Text>

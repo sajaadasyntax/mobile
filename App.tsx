@@ -14,6 +14,13 @@ import LiquidCashScreen from './src/screens/LiquidCashScreen';
 import BalanceSessionsScreen from './src/screens/BalanceSessionsScreen';
 import DailyReportScreen from './src/screens/DailyReportScreen';
 import IncomeScreen from './src/screens/IncomeScreen';
+import InventoryScreen from './src/screens/InventoryScreen';
+import CustomerReportScreen from './src/screens/CustomerReportScreen';
+import OutstandingFeesScreen from './src/screens/OutstandingFeesScreen';
+import CommissionReportScreen from './src/screens/CommissionReportScreen';
+import DailyIncomeLossScreen from './src/screens/DailyIncomeLossScreen';
+import BankTransactionsScreen from './src/screens/BankTransactionsScreen';
+import AssetsLiabilitiesScreen from './src/screens/AssetsLiabilitiesScreen';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 const Stack = createNativeStackNavigator();
@@ -54,7 +61,12 @@ function Navigation() {
           <Stack.Screen 
             name="Dashboard" 
             component={DashboardScreen}
-            options={{ title: 'لوحة التحكم - مراجع عام' }}
+            options={{ title: 'لوحة التحكم' }}
+          />
+          <Stack.Screen 
+            name="Inventory" 
+            component={InventoryScreen}
+            options={{ title: 'المخازن والمخزون' }}
           />
           <Stack.Screen 
             name="AuditLogs" 
@@ -75,6 +87,36 @@ function Navigation() {
             name="ProcurementReport" 
             component={ProcurementReportScreen}
             options={{ title: 'تقرير المشتريات' }}
+          />
+          <Stack.Screen 
+            name="CustomerReport" 
+            component={CustomerReportScreen}
+            options={{ title: 'تقرير العملاء' }}
+          />
+          <Stack.Screen 
+            name="OutstandingFees" 
+            component={OutstandingFeesScreen}
+            options={{ title: 'تقرير المتأخرات' }}
+          />
+          <Stack.Screen 
+            name="CommissionReport" 
+            component={CommissionReportScreen}
+            options={{ title: 'تقرير العمولات' }}
+          />
+          <Stack.Screen 
+            name="DailyIncomeLoss" 
+            component={DailyIncomeLossScreen}
+            options={{ title: 'الإيرادات والمنصرفات' }}
+          />
+          <Stack.Screen 
+            name="BankTransactions" 
+            component={BankTransactionsScreen}
+            options={{ title: 'المعاملات البنكية' }}
+          />
+          <Stack.Screen 
+            name="AssetsLiabilities" 
+            component={AssetsLiabilitiesScreen}
+            options={{ title: 'له و عليه' }}
           />
           <Stack.Screen 
             name="LiquidCash" 

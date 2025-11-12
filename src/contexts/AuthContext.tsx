@@ -49,9 +49,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const data = await authAPI.login(username, password);
       
-      // Check if user is AUDITOR
-      if (data.user.role !== 'AUDITOR') {
-        throw new Error('هذا التطبيق مخصص للمراجعين فقط');
+      // Check if user is AUDITOR, MANAGER, or ACCOUNTANT
+      const allowedRoles = ['AUDITOR', 'MANAGER', 'ACCOUNTANT'];
+      if (!allowedRoles.includes(data.user.role)) {
+        throw new Error('هذا التطبيق مخصص للمراجعين والمحاسبين والمديرين فقط');
       }
       
       await AsyncStorage.setItem('authToken', data.token || '');

@@ -127,6 +127,43 @@ export const reportingAPI = {
     });
     return response.data;
   },
+
+  // Inventory
+  getInventoryStocks: async (inventoryId: string, params?: any) => {
+    const response = await api.get(`/inventories/${inventoryId}/stocks`, { params });
+    return response.data;
+  },
+
+  // Additional Reports
+  getCustomerReport: async (params?: any) => {
+    const response = await api.get('/accounting/customer-report', { params });
+    return response.data;
+  },
+
+  getOutstandingFees: async (params?: any) => {
+    const response = await api.get('/accounting/outstanding-fees', { params });
+    return response.data;
+  },
+
+  getCommissionReport: async (params?: any) => {
+    const response = await api.get('/accounting/commissions', { params });
+    return response.data;
+  },
+
+  getDailyIncomeLoss: async (params?: any) => {
+    const response = await api.get('/accounting/daily-income-loss', { params });
+    return response.data;
+  },
+
+  getBankTransactions: async (params?: any) => {
+    const response = await api.get('/accounting/bank-transactions', { params });
+    return response.data;
+  },
+
+  getAssetsLiabilities: async (params?: any) => {
+    const response = await api.get('/accounting/assets-liabilities', { params });
+    return response.data;
+  },
 };
 
 export default api;
