@@ -21,14 +21,16 @@ export default function CustomerReportScreen() {
 
   const loadReports = async () => {
     try {
+      setLoading(true);
       const params: any = {};
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
 
       const data = await reportingAPI.getCustomerReport(params);
       setReportData(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading customer report:', error);
+      setReportData({ summary: null, data: [] });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -50,71 +52,6 @@ export default function CustomerReportScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Date Filters */}
-      <Card style={styles.filterCard}>
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.filterTitle}>الفترة الزمنية</Text>
-          <View style={styles.dateRow}>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                const today = new Date().toISOString().split('T')[0];
-                setStartDate(today);
-                setEndDate(today);
-                loadReports();
-              }}
-              style={styles.dateButton}
-            >
-              اليوم
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                const today = new Date();
-                const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-                const dateStr = yesterday.toISOString().split('T')[0];
-                setStartDate(dateStr);
-                setEndDate(dateStr);
-                loadReports();
-              }}
-              style={styles.dateButton}
-            >
-              أمس
-            </Button>
-          </View>
-          <Button
-            mode="contained"
-            onPress={loadReports}
-            style={styles.applyButton}
-          >
-            تحديث التقرير
-          </Button>
-        </Card.Content>
-      </Card>
-
-      {/* Summary */}
-      {reportData?.summary && (
-        <View style={styles.summaryRow}>
-          <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الفواتير</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>
-                {reportData.summary.totalInvoices || 0}
-              </Text>
-            </Card.Content>
-          </Card>
-
-          <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المبيعات</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>
-                {formatCurrency(reportData.summary.totalSales || 0)}
-              </Text>
-            </Card.Content>
-          </Card>
-        </View>
-      )}
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -122,6 +59,70 @@ export default function CustomerReportScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Date Filters */}
+        <Card style={styles.filterCard}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.filterTitle}>الفترة الزمنية</Text>
+            <View style={styles.dateRow}>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date().toISOString().split('T')[0];
+                  setStartDate(today);
+                  setEndDate(today);
+                  loadReports();
+                }}
+                style={styles.dateButton}
+              >
+                اليوم
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date();
+                  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+                  const dateStr = yesterday.toISOString().split('T')[0];
+                  setStartDate(dateStr);
+                  setEndDate(dateStr);
+                  loadReports();
+                }}
+                style={styles.dateButton}
+              >
+                أمس
+              </Button>
+            </View>
+            <Button
+              mode="contained"
+              onPress={loadReports}
+              style={styles.applyButton}
+            >
+              تحديث التقرير
+            </Button>
+          </Card.Content>
+        </Card>
+
+        {/* Summary */}
+        {reportData?.summary && (
+          <View style={styles.summaryRow}>
+            <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الفواتير</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {reportData.summary.totalInvoices || 0}
+                </Text>
+              </Card.Content>
+            </Card>
+
+            <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المبيعات</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(reportData.summary.totalSales || 0)}
+                </Text>
+              </Card.Content>
+            </Card>
+          </View>
+        )}
         <View style={styles.reportsContainer}>
           {reportData?.data?.map((invoice: any, index: number) => (
             <Card key={invoice.invoiceNumber || index} style={styles.invoiceCard}>
@@ -242,6 +243,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+    flexGrow: 1,
   },
   applyButton: {
     marginTop: 8,

@@ -17,8 +17,10 @@ export default function BalanceSheetScreen() {
     try {
       const balance = await reportingAPI.getBalanceSummary();
       setData(balance);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading balance sheet:', error);
+      // Set empty data structure to prevent crashes
+      setData(null);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -46,12 +48,13 @@ export default function BalanceSheetScreen() {
     );
   }
 
-  const revenue = parseFloat(data.sales.total);
-  const collected = parseFloat(data.sales.collected);
-  const receivables = revenue - collected;
-  const costs = parseFloat(data.procurement.total) + parseFloat(data.expenses.total);
+  const revenue = parseFloat(data.sales?.total || '0');
+  const collected = parseFloat(data.sales?.received || '0');
+  const receivables = parseFloat(data.sales?.debt || '0');
+  const costs = parseFloat(data.procurement?.total || '0') + parseFloat(data.expenses?.total || '0');
   const netProfit = revenue - costs;
   const profitMargin = revenue > 0 ? (netProfit / revenue) * 100 : 0;
+  const openingBalance = parseFloat(data.balance?.opening || '0');
 
   return (
     <ScrollView
@@ -92,12 +95,12 @@ export default function BalanceSheetScreen() {
             
             <View style={styles.row}>
               <Text>المشتريات</Text>
-              <Text style={[styles.amount, styles.negative]}>{formatCurrency(data.procurement.total)}</Text>
+              <Text style={[styles.amount, styles.negative]}>{formatCurrency(data.procurement?.total || '0')}</Text>
             </View>
             
             <View style={styles.row}>
               <Text>المنصرفات</Text>
-              <Text style={[styles.amount, styles.negative]}>{formatCurrency(data.expenses.total)}</Text>
+              <Text style={[styles.amount, styles.negative]}>{formatCurrency(data.expenses?.total || '0')}</Text>
             </View>
             
             <View style={styles.row}>
@@ -155,7 +158,7 @@ export default function BalanceSheetScreen() {
             
             <View style={styles.row}>
               <Text>رأس المال الافتتاحي</Text>
-              <Text style={styles.amount}>{formatCurrency(data.openingBalance || 0)}</Text>
+              <Text style={styles.amount}>{formatCurrency(openingBalance)}</Text>
             </View>
             
             <View style={styles.row}>
@@ -168,7 +171,7 @@ export default function BalanceSheetScreen() {
             <View style={styles.row}>
               <Text style={styles.bold}>إجمالي حقوق الملكية</Text>
               <Text style={[styles.amount, styles.bold]}>
-                {formatCurrency((data.openingBalance || 0) + netProfit)}
+                {formatCurrency(openingBalance + netProfit)}
               </Text>
             </View>
           </Card.Content>

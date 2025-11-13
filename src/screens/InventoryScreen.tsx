@@ -99,92 +99,6 @@ export default function InventoryScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Filters */}
-      <Card style={styles.filterCard}>
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.filterTitle}>المخزن</Text>
-          <View style={styles.inventoryButtons}>
-            {inventories.map((inv) => (
-              <Button
-                key={inv.id}
-                mode={selectedInventory === inv.id ? 'contained' : 'outlined'}
-                onPress={() => setSelectedInventory(inv.id)}
-                style={styles.inventoryButton}
-                compact
-              >
-                {inv.name}
-              </Button>
-            ))}
-          </View>
-
-          <Text variant="titleMedium" style={[styles.filterTitle, { marginTop: 16 }]}>القسم</Text>
-          <SegmentedButtons
-            value={selectedSection}
-            onValueChange={(value) => setSelectedSection(value)}
-            buttons={[
-              { value: 'GROCERY', label: 'بقالة' },
-              { value: 'BAKERY', label: 'أفران' },
-            ]}
-            style={styles.segmentedButtons}
-          />
-        </Card.Content>
-      </Card>
-
-      {/* Summary Cards */}
-      <View style={styles.summaryRow}>
-        <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
-          <Card.Content>
-            <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الأصناف</Text>
-            <Text variant="headlineSmall" style={styles.summaryValue}>{totalItems}</Text>
-          </Card.Content>
-        </Card>
-
-        <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
-          <Card.Content>
-            <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الكمية</Text>
-            <Text variant="headlineSmall" style={styles.summaryValue}>{formatNumber(totalQuantity)}</Text>
-          </Card.Content>
-        </Card>
-      </View>
-
-      <View style={styles.summaryRow}>
-        <Card style={[styles.summaryCard, { backgroundColor: '#f97316' }]}>
-          <Card.Content>
-            <Text variant="bodySmall" style={styles.summaryLabel}>مخزون منخفض</Text>
-            <Text variant="headlineSmall" style={styles.summaryValue}>{lowStockItems}</Text>
-          </Card.Content>
-        </Card>
-
-        <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
-          <Card.Content>
-            <Text variant="bodySmall" style={styles.summaryLabel}>نفذ من المخزون</Text>
-            <Text variant="headlineSmall" style={styles.summaryValue}>{outOfStockItems}</Text>
-          </Card.Content>
-        </Card>
-      </View>
-
-      {(expiringSoonItems > 0 || expiredItems > 0) && (
-        <View style={styles.summaryRow}>
-          {expiringSoonItems > 0 && (
-            <Card style={[styles.summaryCard, { backgroundColor: '#f97316' }]}>
-              <Card.Content>
-                <Text variant="bodySmall" style={styles.summaryLabel}>ينتهي قريباً</Text>
-                <Text variant="headlineSmall" style={styles.summaryValue}>{expiringSoonItems}</Text>
-              </Card.Content>
-            </Card>
-          )}
-
-          {expiredItems > 0 && (
-            <Card style={[styles.summaryCard, { backgroundColor: '#dc2626' }]}>
-              <Card.Content>
-                <Text variant="bodySmall" style={styles.summaryLabel}>منتهي الصلاحية</Text>
-                <Text variant="headlineSmall" style={styles.summaryValue}>{expiredItems}</Text>
-              </Card.Content>
-            </Card>
-          )}
-        </View>
-      )}
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -192,6 +106,91 @@ export default function InventoryScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Filters */}
+        <Card style={styles.filterCard}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.filterTitle}>المخزن</Text>
+            <View style={styles.inventoryButtons}>
+              {inventories.map((inv) => (
+                <Button
+                  key={inv.id}
+                  mode={selectedInventory === inv.id ? 'contained' : 'outlined'}
+                  onPress={() => setSelectedInventory(inv.id)}
+                  style={styles.inventoryButton}
+                  compact
+                >
+                  {inv.name}
+                </Button>
+              ))}
+            </View>
+
+            <Text variant="titleMedium" style={[styles.filterTitle, { marginTop: 16 }]}>القسم</Text>
+            <SegmentedButtons
+              value={selectedSection}
+              onValueChange={(value) => setSelectedSection(value)}
+              buttons={[
+                { value: 'GROCERY', label: 'بقالة' },
+                { value: 'BAKERY', label: 'أفران' },
+              ]}
+              style={styles.segmentedButtons}
+            />
+          </Card.Content>
+        </Card>
+
+        {/* Summary Cards */}
+        <View style={styles.summaryRow}>
+          <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
+            <Card.Content>
+              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الأصناف</Text>
+              <Text variant="headlineSmall" style={styles.summaryValue}>{totalItems}</Text>
+            </Card.Content>
+          </Card>
+
+          <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
+            <Card.Content>
+              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الكمية</Text>
+              <Text variant="headlineSmall" style={styles.summaryValue}>{formatNumber(totalQuantity)}</Text>
+            </Card.Content>
+          </Card>
+        </View>
+
+        <View style={styles.summaryRow}>
+          <Card style={[styles.summaryCard, { backgroundColor: '#f97316' }]}>
+            <Card.Content>
+              <Text variant="bodySmall" style={styles.summaryLabel}>مخزون منخفض</Text>
+              <Text variant="headlineSmall" style={styles.summaryValue}>{lowStockItems}</Text>
+            </Card.Content>
+          </Card>
+
+          <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
+            <Card.Content>
+              <Text variant="bodySmall" style={styles.summaryLabel}>نفذ من المخزون</Text>
+              <Text variant="headlineSmall" style={styles.summaryValue}>{outOfStockItems}</Text>
+            </Card.Content>
+          </Card>
+        </View>
+
+        {(expiringSoonItems > 0 || expiredItems > 0) && (
+          <View style={styles.summaryRow}>
+            {expiringSoonItems > 0 && (
+              <Card style={[styles.summaryCard, { backgroundColor: '#f97316' }]}>
+                <Card.Content>
+                  <Text variant="bodySmall" style={styles.summaryLabel}>ينتهي قريباً</Text>
+                  <Text variant="headlineSmall" style={styles.summaryValue}>{expiringSoonItems}</Text>
+                </Card.Content>
+              </Card>
+            )}
+
+            {expiredItems > 0 && (
+              <Card style={[styles.summaryCard, { backgroundColor: '#dc2626' }]}>
+                <Card.Content>
+                  <Text variant="bodySmall" style={styles.summaryLabel}>منتهي الصلاحية</Text>
+                  <Text variant="headlineSmall" style={styles.summaryValue}>{expiredItems}</Text>
+                </Card.Content>
+              </Card>
+            )}
+          </View>
+        )}
         <View style={styles.stocksContainer}>
           {stocks.map((stock) => {
             const expiryStatus = getExpiryStatus(stock);
@@ -365,6 +364,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+    flexGrow: 1,
   },
 });
 

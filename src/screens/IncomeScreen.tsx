@@ -10,6 +10,7 @@ interface IncomeItem {
   method: 'CASH' | 'BANK' | 'BANK_NILE';
   description: string;
   createdAt: string;
+  isDebt?: boolean;
   creator?: {
     username: string;
   };
@@ -28,8 +29,9 @@ export default function IncomeScreen() {
     try {
       const data = await reportingAPI.getIncome();
       setIncome(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading income:', error);
+      setIncome([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -163,9 +165,21 @@ export default function IncomeScreen() {
                 <DataTable.Row key={item.id}>
                   <DataTable.Cell>
                     <View>
-                      <Text variant="bodyMedium" style={styles.description}>
-                        {item.description}
-                      </Text>
+                      <View style={styles.descriptionRow}>
+                        <Text variant="bodyMedium" style={styles.description}>
+                          {item.description}
+                        </Text>
+                        {item.isDebt && (
+                          <Chip
+                            mode="flat"
+                            style={[styles.debtChip, { backgroundColor: '#f97316' }]}
+                            textStyle={styles.debtChipText}
+                            compact
+                          >
+                            دين
+                          </Chip>
+                        )}
+                      </View>
                       <Text variant="bodySmall" style={styles.metadata}>
                         {formatDateTime(item.createdAt)}
                       </Text>
@@ -261,8 +275,22 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#6b7280',
   },
+  descriptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
   description: {
     fontWeight: '500',
+    flex: 1,
+  },
+  debtChip: {
+    alignSelf: 'flex-start',
+  },
+  debtChipText: {
+    color: 'white',
+    fontSize: 10,
   },
   metadata: {
     color: '#6b7280',

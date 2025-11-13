@@ -17,6 +17,7 @@ export default function SalesReportScreen() {
 
   const loadReports = async () => {
     try {
+      setLoading(true);
       const params: any = {};
       
       // Single date only
@@ -26,8 +27,10 @@ export default function SalesReportScreen() {
 
       const data = await reportingAPI.getSalesReports(params);
       setReportData(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading sales reports:', error);
+      // Set empty data structure to prevent white screen
+      setReportData({ summary: null, data: [] });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -51,69 +54,16 @@ export default function SalesReportScreen() {
     );
   }
 
+  if (!reportData && !loading) {
+    return (
+      <View style={styles.loading}>
+        <Text>لا توجد بيانات للعرض</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* Date Filter */}
-      <Card style={styles.filterCard}>
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.filterTitle}>اختر التاريخ</Text>
-          <View style={styles.dateRow}>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                const today = new Date().toISOString().split('T')[0];
-                setDate(today);
-                applyDateFilter();
-              }}
-              style={styles.dateButton}
-            >
-              اليوم
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                const today = new Date();
-                const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-                setDate(yesterday.toISOString().split('T')[0]);
-                applyDateFilter();
-              }}
-              style={styles.dateButton}
-            >
-              أمس
-            </Button>
-          </View>
-          <Text variant="bodyMedium" style={styles.dateLabel}>
-            التاريخ المحدد: {date || 'لم يتم التحديد'}
-          </Text>
-          <Button
-            mode="contained"
-            onPress={applyDateFilter}
-            style={styles.applyButton}
-          >
-            تحديث التقرير
-          </Button>
-        </Card.Content>
-      </Card>
-
-      {/* Summary Cards */}
-      {reportData?.summary && (
-        <View style={styles.summaryRow}>
-          <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الفواتير</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>{reportData.summary.totalInvoices}</Text>
-            </Card.Content>
-          </Card>
-
-          <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المبيعات</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(reportData.summary.totalSales)}</Text>
-            </Card.Content>
-          </Card>
-        </View>
-      )}
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -121,93 +71,173 @@ export default function SalesReportScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View style={styles.reportsContainer}>
-          {reportData?.data?.map((periodData: any, index: number) => (
-            <Card key={index} style={styles.periodCard}>
+        {/* Date Filter */}
+        <Card style={styles.filterCard}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.filterTitle}>اختر التاريخ</Text>
+            <View style={styles.dateRow}>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date().toISOString().split('T')[0];
+                  setDate(today);
+                  applyDateFilter();
+                }}
+                style={styles.dateButton}
+              >
+                اليوم
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date();
+                  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+                  setDate(yesterday.toISOString().split('T')[0]);
+                  applyDateFilter();
+                }}
+                style={styles.dateButton}
+              >
+                أمس
+              </Button>
+            </View>
+            <Text variant="bodyMedium" style={styles.dateLabel}>
+              التاريخ المحدد: {date || 'لم يتم التحديد'}
+            </Text>
+            <Button
+              mode="contained"
+              onPress={applyDateFilter}
+              style={styles.applyButton}
+            >
+              تحديث التقرير
+            </Button>
+          </Card.Content>
+        </Card>
+
+        {/* Summary Cards */}
+        {reportData?.summary && (
+          <View style={styles.summaryRow}>
+            <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
               <Card.Content>
-                <View style={styles.periodHeader}>
-                  <Text variant="titleMedium" style={styles.periodTitle}>
-                    {formatDateTime(periodData.date || date)}
-                  </Text>
-                  <Text variant="bodySmall" style={styles.periodStats}>
-                    {periodData.invoiceCount} فاتورة - {formatCurrency(periodData.totalSales)}
-                  </Text>
-                </View>
-
-                {/* Payment Methods */}
-                <View style={styles.section}>
-                  <Text variant="titleSmall" style={styles.sectionTitle}>طرق الدفع</Text>
-                  <View style={styles.chipRow}>
-                    {Object.entries(periodData.paymentMethods).map(([method, data]: [string, any]) => (
-                      <Chip
-                        key={method}
-                        mode="flat"
-                        style={styles.chip}
-                        textStyle={styles.chipText}
-                      >
-                        {paymentMethodLabels[method]}: {data.count}
-                      </Chip>
-                    ))}
-                  </View>
-                </View>
-
-                {/* Items Summary */}
-                <View style={styles.section}>
-                  <Text variant="titleSmall" style={styles.sectionTitle}>الأصناف المباعة</Text>
-                  {Object.entries(periodData.items).slice(0, 5).map(([itemName, itemData]: [string, any]) => (
-                    <View key={itemName} style={styles.itemRow}>
-                      <Text variant="bodyMedium" style={styles.itemName}>{itemName}</Text>
-                      <Text variant="bodySmall" style={styles.itemDetails}>
-                        {itemData.quantity} × {formatCurrency(itemData.unitPrice)} = {formatCurrency(itemData.totalAmount)}
-                      </Text>
-                    </View>
-                  ))}
-                  {Object.keys(periodData.items).length > 5 && (
-                    <Text variant="bodySmall" style={styles.moreItems}>
-                      و {Object.keys(periodData.items).length - 5} صنف آخر...
-                    </Text>
-                  )}
-                </View>
-
-                {/* Recent Invoices */}
-                <View style={styles.section}>
-                  <Text variant="titleSmall" style={styles.sectionTitle}>آخر الفواتير</Text>
-                  {periodData.invoices.slice(0, 3).map((invoice: any) => (
-                    <View key={invoice.id} style={styles.invoiceRow}>
-                      <Text variant="bodyMedium" style={styles.invoiceNumber}>
-                        {invoice.invoiceNumber}
-                      </Text>
-                      <Text variant="bodySmall" style={styles.invoiceDetails}>
-                        {invoice.customer.name} - {formatCurrency(invoice.total)}
-                      </Text>
-                      <View style={styles.invoiceChips}>
-                        <Chip
-                          mode="flat"
-                          style={[
-                            styles.statusChip,
-                            { backgroundColor: invoice.paymentStatus === 'PAID' ? '#10b981' : invoice.paymentStatus === 'PARTIAL' ? '#f97316' : '#ef4444' }
-                          ]}
-                          textStyle={styles.chipText}
-                        >
-                          {paymentStatusLabels[invoice.paymentStatus]}
-                        </Chip>
-                        <Chip
-                          mode="flat"
-                          style={[
-                            styles.statusChip,
-                            { backgroundColor: invoice.deliveryStatus === 'DELIVERED' ? '#10b981' : '#f97316' }
-                          ]}
-                          textStyle={styles.chipText}
-                        >
-                          {deliveryStatusLabels[invoice.deliveryStatus]}
-                        </Chip>
-                      </View>
-                    </View>
-                  ))}
-                </View>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الفواتير</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>{reportData.summary.totalInvoices || 0}</Text>
               </Card.Content>
             </Card>
-          ))}
+
+            <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المبيعات</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(reportData.summary.totalSales || 0)}</Text>
+              </Card.Content>
+            </Card>
+          </View>
+        )}
+        <View style={styles.reportsContainer}>
+          {reportData?.data && reportData.data.length > 0 ? (
+            reportData.data.map((periodData: any, index: number) => (
+              <Card key={index} style={styles.periodCard}>
+                <Card.Content>
+                  <View style={styles.periodHeader}>
+                    <Text variant="titleMedium" style={styles.periodTitle}>
+                      {periodData.date ? formatDateTime(periodData.date) : (date ? formatDateTime(date) : 'التاريخ غير محدد')}
+                    </Text>
+                    <Text variant="bodySmall" style={styles.periodStats}>
+                      {periodData.invoiceCount || periodData.count || 0} فاتورة - {formatCurrency(periodData.totalSales || periodData.totalAmount || 0)}
+                    </Text>
+                  </View>
+
+                  {/* Payment Methods */}
+                  {periodData.paymentMethods && Object.keys(periodData.paymentMethods).length > 0 && (
+                    <View style={styles.section}>
+                      <Text variant="titleSmall" style={styles.sectionTitle}>طرق الدفع</Text>
+                      <View style={styles.chipRow}>
+                        {Object.entries(periodData.paymentMethods).map(([method, data]: [string, any]) => (
+                          <Chip
+                            key={method}
+                            mode="flat"
+                            style={styles.chip}
+                            textStyle={styles.chipText}
+                          >
+                            {paymentMethodLabels[method] || method}: {data?.count || 0}
+                          </Chip>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Items Summary */}
+                  {periodData.items && Object.keys(periodData.items).length > 0 && (
+                    <View style={styles.section}>
+                      <Text variant="titleSmall" style={styles.sectionTitle}>الأصناف المباعة</Text>
+                      {Object.entries(periodData.items).slice(0, 5).map(([itemName, itemData]: [string, any]) => (
+                        <View key={itemName} style={styles.itemRow}>
+                          <Text variant="bodyMedium" style={styles.itemName}>{itemName}</Text>
+                          <Text variant="bodySmall" style={styles.itemDetails}>
+                            {itemData.quantity || 0} × {formatCurrency(itemData.unitPrice || itemData.price || 0)} = {formatCurrency(itemData.totalAmount || 0)}
+                          </Text>
+                        </View>
+                      ))}
+                      {Object.keys(periodData.items).length > 5 && (
+                        <Text variant="bodySmall" style={styles.moreItems}>
+                          و {Object.keys(periodData.items).length - 5} صنف آخر...
+                        </Text>
+                      )}
+                    </View>
+                  )}
+
+                  {/* Recent Invoices */}
+                  {periodData.invoices && periodData.invoices.length > 0 && (
+                    <View style={styles.section}>
+                      <Text variant="titleSmall" style={styles.sectionTitle}>آخر الفواتير</Text>
+                      {periodData.invoices.slice(0, 3).map((invoice: any) => (
+                        <View key={invoice.id} style={styles.invoiceRow}>
+                          <Text variant="bodyMedium" style={styles.invoiceNumber}>
+                            {invoice.invoiceNumber || invoice.number || 'N/A'}
+                          </Text>
+                          <Text variant="bodySmall" style={styles.invoiceDetails}>
+                            {invoice.customer?.name || 'عميل'} - {formatCurrency(invoice.total || 0)}
+                          </Text>
+                          <View style={styles.invoiceChips}>
+                            {invoice.paymentStatus && (
+                              <Chip
+                                mode="flat"
+                                style={[
+                                  styles.statusChip,
+                                  { backgroundColor: invoice.paymentStatus === 'PAID' ? '#10b981' : invoice.paymentStatus === 'PARTIAL' ? '#f97316' : '#ef4444' }
+                                ]}
+                                textStyle={styles.chipText}
+                              >
+                                {paymentStatusLabels[invoice.paymentStatus] || invoice.paymentStatus}
+                              </Chip>
+                            )}
+                            {invoice.deliveryStatus && (
+                              <Chip
+                                mode="flat"
+                                style={[
+                                  styles.statusChip,
+                                  { backgroundColor: invoice.deliveryStatus === 'DELIVERED' ? '#10b981' : '#f97316' }
+                                ]}
+                                textStyle={styles.chipText}
+                              >
+                                {deliveryStatusLabels[invoice.deliveryStatus] || invoice.deliveryStatus}
+                              </Chip>
+                            )}
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </Card.Content>
+              </Card>
+            ))
+          ) : (
+            <Card style={styles.periodCard}>
+              <Card.Content>
+                <Text variant="bodyMedium" style={styles.emptyText}>
+                  لا توجد بيانات للعرض. يرجى اختيار تاريخ وتحديث التقرير.
+                </Text>
+              </Card.Content>
+            </Card>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -255,6 +285,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+    flexGrow: 1,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#666',
+    padding: 16,
   },
   applyButton: {
     marginTop: 8,

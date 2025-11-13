@@ -57,89 +57,6 @@ export default function ProcurementReportScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Period Selector */}
-      <View style={styles.header}>
-        <SegmentedButtons
-          value={period}
-          onValueChange={handlePeriodChange}
-          buttons={[
-            { value: 'daily', label: 'يومي' },
-            { value: 'monthly', label: 'شهري' },
-          ]}
-          style={styles.segmentedButtons}
-        />
-      </View>
-
-      {/* Date Filters */}
-      <Card style={styles.filterCard}>
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.filterTitle}>فلترة التاريخ</Text>
-          <View style={styles.dateRow}>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                const today = new Date().toISOString().split('T')[0];
-                setStartDate(today);
-                setEndDate(today);
-              }}
-              style={styles.dateButton}
-            >
-              اليوم
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                const today = new Date();
-                const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-                setStartDate(weekAgo.toISOString().split('T')[0]);
-                setEndDate(today.toISOString().split('T')[0]);
-              }}
-              style={styles.dateButton}
-            >
-              آخر أسبوع
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                const today = new Date();
-                const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-                setStartDate(monthAgo.toISOString().split('T')[0]);
-                setEndDate(today.toISOString().split('T')[0]);
-              }}
-              style={styles.dateButton}
-            >
-              آخر شهر
-            </Button>
-          </View>
-          <Button
-            mode="contained"
-            onPress={applyDateFilter}
-            style={styles.applyButton}
-          >
-            تطبيق الفلتر
-          </Button>
-        </Card.Content>
-      </Card>
-
-      {/* Summary Cards */}
-      {reportData?.summary && (
-        <View style={styles.summaryRow}>
-          <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الأوامر</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>{reportData.summary.totalOrders}</Text>
-            </Card.Content>
-          </Card>
-
-          <Card style={[styles.summaryCard, { backgroundColor: '#f97316' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المشتريات</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(reportData.summary.totalAmount)}</Text>
-            </Card.Content>
-          </Card>
-        </View>
-      )}
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -147,6 +64,88 @@ export default function ProcurementReportScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Period Selector */}
+        <View style={styles.header}>
+          <SegmentedButtons
+            value={period}
+            onValueChange={handlePeriodChange}
+            buttons={[
+              { value: 'daily', label: 'يومي' },
+              { value: 'monthly', label: 'شهري' },
+            ]}
+            style={styles.segmentedButtons}
+          />
+        </View>
+
+        {/* Date Filters */}
+        <Card style={styles.filterCard}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.filterTitle}>فلترة التاريخ</Text>
+            <View style={styles.dateRow}>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date().toISOString().split('T')[0];
+                  setStartDate(today);
+                  setEndDate(today);
+                }}
+                style={styles.dateButton}
+              >
+                اليوم
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date();
+                  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                  setStartDate(weekAgo.toISOString().split('T')[0]);
+                  setEndDate(today.toISOString().split('T')[0]);
+                }}
+                style={styles.dateButton}
+              >
+                آخر أسبوع
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date();
+                  const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                  setStartDate(monthAgo.toISOString().split('T')[0]);
+                  setEndDate(today.toISOString().split('T')[0]);
+                }}
+                style={styles.dateButton}
+              >
+                آخر شهر
+              </Button>
+            </View>
+            <Button
+              mode="contained"
+              onPress={applyDateFilter}
+              style={styles.applyButton}
+            >
+              تطبيق الفلتر
+            </Button>
+          </Card.Content>
+        </Card>
+
+        {/* Summary Cards */}
+        {reportData?.summary && (
+          <View style={styles.summaryRow}>
+            <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الأوامر</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>{reportData.summary.totalOrders}</Text>
+              </Card.Content>
+            </Card>
+
+            <Card style={[styles.summaryCard, { backgroundColor: '#f97316' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المشتريات</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(reportData.summary.totalAmount)}</Text>
+              </Card.Content>
+            </Card>
+          </View>
+        )}
         <View style={styles.reportsContainer}>
           {reportData?.data?.map((periodData: any, index: number) => (
             <Card key={index} style={styles.periodCard}>
@@ -311,6 +310,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+    flexGrow: 1,
   },
   applyButton: {
     marginTop: 8,

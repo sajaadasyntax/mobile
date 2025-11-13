@@ -16,10 +16,12 @@ export default function BalanceSessionsScreen({ navigation }: any) {
 
   const loadData = async () => {
     try {
+      setLoading(true);
       const data = await reportingAPI.getBalanceSessions();
-      setSessions(data);
-    } catch (error) {
+      setSessions(Array.isArray(data) ? data : []);
+    } catch (error: any) {
       console.error('Error loading balance sessions:', error);
+      setSessions([]);
     } finally {
       setLoading(false);
       setRefreshing(false);

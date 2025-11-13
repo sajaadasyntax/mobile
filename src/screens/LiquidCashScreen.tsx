@@ -16,10 +16,12 @@ export default function LiquidCashScreen({ navigation }: any) {
 
   const loadData = async () => {
     try {
+      setLoading(true);
       const data = await reportingAPI.getLiquidCash();
       setLiquidCash(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading liquid cash:', error);
+      setLiquidCash(null);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -35,6 +37,14 @@ export default function LiquidCashScreen({ navigation }: any) {
     return (
       <View style={styles.center}>
         <Text>جاري التحميل...</Text>
+      </View>
+    );
+  }
+
+  if (!liquidCash) {
+    return (
+      <View style={styles.center}>
+        <Text>لا توجد بيانات للعرض</Text>
       </View>
     );
   }
@@ -61,17 +71,18 @@ export default function LiquidCashScreen({ navigation }: any) {
                     إجمالي النقد السائل
                   </Text>
                   <Text variant="headlineMedium" style={styles.summaryAmount}>
-                    {formatCurrency(liquidCash.total)}
+                    {formatCurrency(liquidCash.total || 0)}
                   </Text>
                 </Card.Content>
               </Card>
 
               <View style={styles.paymentMethods}>
-                <Text variant="titleMedium" style={styles.sectionTitle}>
-                  حسب طريقة الدفع
-                </Text>
-                
-                {liquidCash.byMethod?.map((method: any, index: number) => (
+                  <Text variant="titleMedium" style={styles.sectionTitle}>
+                    حسب طريقة الدفع
+                  </Text>
+                  
+                  {liquidCash.byMethod && liquidCash.byMethod.length > 0 ? (
+                    liquidCash.byMethod.map((method: any, index: number) => (
                   <Card key={index} style={styles.methodCard}>
                     <Card.Content>
                       <View style={styles.methodRow}>
@@ -88,7 +99,16 @@ export default function LiquidCashScreen({ navigation }: any) {
                       </Text>
                     </Card.Content>
                   </Card>
-                ))}
+                    ))
+                  ) : (
+                    <Card style={styles.methodCard}>
+                      <Card.Content>
+                        <Text variant="bodyMedium" style={styles.methodCount}>
+                          لا توجد معاملات
+                        </Text>
+                      </Card.Content>
+                    </Card>
+                  )}
               </View>
             </View>
           )}
