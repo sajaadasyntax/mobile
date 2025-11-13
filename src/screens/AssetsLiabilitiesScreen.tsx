@@ -40,6 +40,42 @@ export default function AssetsLiabilitiesScreen() {
     );
   }
 
+  // Build assets items from API structure
+  const assetsItems: any[] = [];
+  if (reportData?.assets) {
+    if (reportData.assets.stockValues?.byWarehouse) {
+      reportData.assets.stockValues.byWarehouse.forEach((w: any) => {
+        assetsItems.push({ name: `المخزن: ${w.inventoryName}`, amount: w.totalValue });
+      });
+    }
+    if (reportData.assets.liquidCash) {
+      assetsItems.push({ name: 'رصيد الخزينة (كاش)', amount: reportData.assets.liquidCash.CASH });
+      assetsItems.push({ name: 'رصيد بنكك', amount: reportData.assets.liquidCash.BANK });
+      assetsItems.push({ name: 'رصيد بنك النيل', amount: reportData.assets.liquidCash.BANK_NILE });
+    }
+    if (reportData.assets.inboundDebts?.total) {
+      assetsItems.push({ name: 'الديون الواردة (لنا)', amount: reportData.assets.inboundDebts.total });
+    }
+    if (reportData.assets.deliveredUnpaidSales?.byWarehouse) {
+      reportData.assets.deliveredUnpaidSales.byWarehouse.forEach((w: any) => {
+        assetsItems.push({ name: `مديونية ${w.inventoryName}`, amount: w.totalOutstanding });
+      });
+    }
+  }
+
+  // Build liabilities items from API structure
+  const liabilitiesItems: any[] = [];
+  if (reportData?.liabilities) {
+    if (reportData.liabilities.outboundDebts?.total) {
+      liabilitiesItems.push({ name: 'الديون الصادرة (علينا)', amount: reportData.liabilities.outboundDebts.total });
+    }
+    if (reportData.liabilities.unpaidProcOrders?.bySupplier) {
+      reportData.liabilities.unpaidProcOrders.bySupplier.forEach((s: any) => {
+        liabilitiesItems.push({ name: `مديونية ${s.supplierName}`, amount: s.totalOutstanding });
+      });
+    }
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -57,14 +93,14 @@ export default function AssetsLiabilitiesScreen() {
                 <Text variant="titleLarge" style={styles.sectionTitle}>الأصول (له)</Text>
                 <View style={styles.summaryRow}>
                   <Text variant="headlineMedium" style={styles.totalAmount}>
-                    {formatCurrency(reportData.assets.total || 0)}
+                    {formatCurrency(parseFloat(reportData.assets.total || '0'))}
                   </Text>
                 </View>
-                {reportData.assets.items && reportData.assets.items.map((item: any, index: number) => (
+                {assetsItems.map((item: any, index: number) => (
                   <View key={index} style={styles.itemRow}>
                     <Text variant="bodyMedium" style={styles.itemName}>{item.name}</Text>
                     <Text variant="bodyMedium" style={styles.itemAmount}>
-                      {formatCurrency(item.amount)}
+                      {formatCurrency(parseFloat(item.amount || '0'))}
                     </Text>
                   </View>
                 ))}
@@ -79,14 +115,14 @@ export default function AssetsLiabilitiesScreen() {
                 <Text variant="titleLarge" style={styles.sectionTitle}>الالتزامات (عليه)</Text>
                 <View style={styles.summaryRow}>
                   <Text variant="headlineMedium" style={styles.totalAmount}>
-                    {formatCurrency(reportData.liabilities.total || 0)}
+                    {formatCurrency(parseFloat(reportData.liabilities.total || '0'))}
                   </Text>
                 </View>
-                {reportData.liabilities.items && reportData.liabilities.items.map((item: any, index: number) => (
+                {liabilitiesItems.map((item: any, index: number) => (
                   <View key={index} style={styles.itemRow}>
                     <Text variant="bodyMedium" style={styles.itemName}>{item.name}</Text>
                     <Text variant="bodyMedium" style={styles.itemAmount}>
-                      {formatCurrency(item.amount)}
+                      {formatCurrency(parseFloat(item.amount || '0'))}
                     </Text>
                   </View>
                 ))}
@@ -96,11 +132,11 @@ export default function AssetsLiabilitiesScreen() {
 
           {/* Net */}
           {reportData && (
-            <Card style={[styles.netCard, { backgroundColor: (reportData.net || 0) >= 0 ? '#10b981' : '#ef4444' }]}>
+            <Card style={[styles.netCard, { backgroundColor: parseFloat(reportData.net || '0') >= 0 ? '#10b981' : '#ef4444' }]}>
               <Card.Content>
                 <Text variant="titleLarge" style={styles.netLabel}>صافي الأصول</Text>
                 <Text variant="headlineLarge" style={styles.netValue}>
-                  {formatCurrency(reportData.net || 0)}
+                  {formatCurrency(parseFloat(reportData.net || '0'))}
                 </Text>
               </Card.Content>
             </Card>

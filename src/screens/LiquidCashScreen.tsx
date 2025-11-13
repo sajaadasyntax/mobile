@@ -71,7 +71,7 @@ export default function LiquidCashScreen({ navigation }: any) {
                     إجمالي النقد السائل
                   </Text>
                   <Text variant="headlineMedium" style={styles.summaryAmount}>
-                    {formatCurrency(liquidCash.total || 0)}
+                    {formatCurrency(parseFloat(liquidCash.net?.total || '0'))}
                   </Text>
                 </Card.Content>
               </Card>
@@ -81,33 +81,39 @@ export default function LiquidCashScreen({ navigation }: any) {
                     حسب طريقة الدفع
                   </Text>
                   
-                  {liquidCash.byMethod && liquidCash.byMethod.length > 0 ? (
-                    liquidCash.byMethod.map((method: any, index: number) => (
-                  <Card key={index} style={styles.methodCard}>
-                    <Card.Content>
-                      <View style={styles.methodRow}>
-                        <Text variant="titleMedium">
-                          {method.method === 'CASH' ? 'كاش' : 
-                           method.method === 'BANK' ? 'بنكك' : 'بنك النيل'}
-                        </Text>
-                        <Text variant="headlineSmall" style={styles.methodAmount}>
-                          {formatCurrency(method.total)}
-                        </Text>
-                      </View>
-                      <Text variant="bodyMedium" style={styles.methodCount}>
-                        {method.count} معاملة
-                      </Text>
-                    </Card.Content>
-                  </Card>
-                    ))
-                  ) : (
-                    <Card style={styles.methodCard}>
-                      <Card.Content>
-                        <Text variant="bodyMedium" style={styles.methodCount}>
-                          لا توجد معاملات
-                        </Text>
-                      </Card.Content>
-                    </Card>
+                  {liquidCash.net && (
+                    <>
+                      <Card style={styles.methodCard}>
+                        <Card.Content>
+                          <View style={styles.methodRow}>
+                            <Text variant="titleMedium">كاش</Text>
+                            <Text variant="headlineSmall" style={styles.methodAmount}>
+                              {formatCurrency(parseFloat(liquidCash.net.cash || '0'))}
+                            </Text>
+                          </View>
+                        </Card.Content>
+                      </Card>
+                      <Card style={styles.methodCard}>
+                        <Card.Content>
+                          <View style={styles.methodRow}>
+                            <Text variant="titleMedium">بنكك</Text>
+                            <Text variant="headlineSmall" style={styles.methodAmount}>
+                              {formatCurrency(parseFloat(liquidCash.net.bank || '0'))}
+                            </Text>
+                          </View>
+                        </Card.Content>
+                      </Card>
+                      <Card style={styles.methodCard}>
+                        <Card.Content>
+                          <View style={styles.methodRow}>
+                            <Text variant="titleMedium">بنك النيل</Text>
+                            <Text variant="headlineSmall" style={styles.methodAmount}>
+                              {formatCurrency(parseFloat(liquidCash.net.bankNile || '0'))}
+                            </Text>
+                          </View>
+                        </Card.Content>
+                      </Card>
+                    </>
                   )}
               </View>
             </View>

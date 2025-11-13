@@ -95,12 +95,12 @@ export default function BalanceSheetScreen() {
             
             <View style={styles.row}>
               <Text>المشتريات</Text>
-              <Text style={[styles.amount, styles.negative]}>{formatCurrency(data.procurement?.total || '0')}</Text>
+              <Text style={[styles.amount, styles.negative]}>{formatCurrency(parseFloat(data.procurement?.total || '0'))}</Text>
             </View>
             
             <View style={styles.row}>
               <Text>المنصرفات</Text>
-              <Text style={[styles.amount, styles.negative]}>{formatCurrency(data.expenses?.total || '0')}</Text>
+              <Text style={[styles.amount, styles.negative]}>{formatCurrency(parseFloat(data.expenses?.total || '0'))}</Text>
             </View>
             
             <View style={styles.row}>

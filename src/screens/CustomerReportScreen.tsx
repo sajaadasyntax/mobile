@@ -117,7 +117,7 @@ export default function CustomerReportScreen() {
               <Card.Content>
                 <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المبيعات</Text>
                 <Text variant="headlineSmall" style={styles.summaryValue}>
-                  {formatCurrency(reportData.summary.totalSales || 0)}
+                  {formatCurrency(parseFloat(reportData.summary.totalSales || '0'))}
                 </Text>
               </Card.Content>
             </Card>
@@ -132,7 +132,7 @@ export default function CustomerReportScreen() {
                     {invoice.invoiceNumber}
                   </Text>
                   <Text variant="headlineSmall" style={styles.invoiceTotal}>
-                    {formatCurrency(invoice.total)}
+                    {formatCurrency(parseFloat(invoice.total || '0'))}
                   </Text>
                 </View>
 
@@ -165,6 +165,8 @@ export default function CustomerReportScreen() {
                       ? 'مدفوع'
                       : invoice.paymentStatus === 'PARTIAL'
                       ? 'جزئي'
+                      : invoice.paymentStatus === 'CREDIT'
+                      ? 'آجل'
                       : 'آجل'}
                   </Chip>
                   <Chip

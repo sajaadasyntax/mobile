@@ -141,7 +141,7 @@ export default function ProcurementReportScreen() {
             <Card style={[styles.summaryCard, { backgroundColor: '#f97316' }]}>
               <Card.Content>
                 <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المشتريات</Text>
-                <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(reportData.summary.totalAmount)}</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(parseFloat(reportData.summary.totalAmount || '0'))}</Text>
               </Card.Content>
             </Card>
           </View>
@@ -158,7 +158,7 @@ export default function ProcurementReportScreen() {
                     }
                   </Text>
                   <Text variant="bodySmall" style={styles.periodStats}>
-                    {periodData.orderCount} أمر - {formatCurrency(periodData.totalAmount)}
+                    {periodData.orderCount} أمر - {formatCurrency(parseFloat(periodData.totalAmount || '0'))}
                   </Text>
                 </View>
 
@@ -210,7 +210,7 @@ export default function ProcurementReportScreen() {
                     <View key={itemName} style={styles.itemRow}>
                       <Text variant="bodyMedium" style={styles.itemName}>{itemName}</Text>
                       <Text variant="bodySmall" style={styles.itemDetails}>
-                        {itemData.quantity} × {formatCurrency(itemData.unitCost)} = {formatCurrency(itemData.totalAmount)}
+                        {itemData.quantity} × {formatCurrency(parseFloat(itemData.unitCost || '0'))} = {formatCurrency(parseFloat(itemData.totalAmount || '0'))}
                       </Text>
                     </View>
                   ))}
@@ -230,7 +230,7 @@ export default function ProcurementReportScreen() {
                         {order.orderNumber}
                       </Text>
                       <Text variant="bodySmall" style={styles.orderDetails}>
-                        {order.supplier.name} - {formatCurrency(order.total)}
+                        {order.supplier.name} - {formatCurrency(parseFloat(order.total || '0'))}
                       </Text>
                       <View style={styles.orderChips}>
                         <Chip

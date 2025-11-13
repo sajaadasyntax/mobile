@@ -6,6 +6,7 @@ import { formatCurrency, formatDateTime } from '../utils/formatters';
 
 interface ExpenseItem {
   id: string;
+  type: 'EXPENSE' | 'SALARY' | 'ADVANCE';
   amount: string;
   method: 'CASH' | 'BANK' | 'BANK_NILE';
   description: string;
@@ -16,6 +17,14 @@ interface ExpenseItem {
   inventory?: {
     name: string;
   };
+  employee?: {
+    name: string;
+    position: string;
+  };
+  month?: number;
+  year?: number;
+  reason?: string;
+  notes?: string;
 }
 
 export default function ExpensesScreen() {
@@ -167,12 +176,39 @@ export default function ExpensesScreen() {
                 <DataTable.Row key={item.id}>
                   <DataTable.Cell>
                     <View>
-                      <Text variant="bodyMedium" style={styles.description}>
-                        {item.description}
-                      </Text>
+                      <View style={styles.descriptionRow}>
+                        <Text variant="bodyMedium" style={styles.description}>
+                          {item.description}
+                        </Text>
+                        {item.type === 'SALARY' && (
+                          <Chip
+                            mode="flat"
+                            style={[styles.typeChip, { backgroundColor: '#10b981' }]}
+                            textStyle={styles.typeChipText}
+                            compact
+                          >
+                            راتب
+                          </Chip>
+                        )}
+                        {item.type === 'ADVANCE' && (
+                          <Chip
+                            mode="flat"
+                            style={[styles.typeChip, { backgroundColor: '#f97316' }]}
+                            textStyle={styles.typeChipText}
+                            compact
+                          >
+                            سلفية
+                          </Chip>
+                        )}
+                      </View>
                       {item.inventory && (
                         <Text variant="bodySmall" style={styles.metadata}>
                           {item.inventory.name}
+                        </Text>
+                      )}
+                      {item.employee && (
+                        <Text variant="bodySmall" style={styles.metadata}>
+                          {item.employee.name} - {item.employee.position}
                         </Text>
                       )}
                       <Text variant="bodySmall" style={styles.metadata}>
@@ -270,9 +306,22 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#6b7280',
   },
+  descriptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
   description: {
     fontWeight: '500',
     flex: 1,
+  },
+  typeChip: {
+    alignSelf: 'flex-start',
+  },
+  typeChipText: {
+    color: 'white',
+    fontSize: 10,
   },
   metadata: {
     color: '#6b7280',

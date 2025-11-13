@@ -126,7 +126,7 @@ export default function SalesReportScreen() {
             <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
               <Card.Content>
                 <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المبيعات</Text>
-                <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(reportData.summary.totalSales || 0)}</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>{formatCurrency(parseFloat(reportData.summary.totalSales || '0'))}</Text>
               </Card.Content>
             </Card>
           </View>
@@ -141,7 +141,7 @@ export default function SalesReportScreen() {
                       {periodData.date ? formatDateTime(periodData.date) : (date ? formatDateTime(date) : 'التاريخ غير محدد')}
                     </Text>
                     <Text variant="bodySmall" style={styles.periodStats}>
-                      {periodData.invoiceCount || periodData.count || 0} فاتورة - {formatCurrency(periodData.totalSales || periodData.totalAmount || 0)}
+                      {periodData.invoiceCount || periodData.count || 0} فاتورة - {formatCurrency(parseFloat(periodData.totalSales || periodData.totalAmount || '0'))}
                     </Text>
                   </View>
 
@@ -172,7 +172,7 @@ export default function SalesReportScreen() {
                         <View key={itemName} style={styles.itemRow}>
                           <Text variant="bodyMedium" style={styles.itemName}>{itemName}</Text>
                           <Text variant="bodySmall" style={styles.itemDetails}>
-                            {itemData.quantity || 0} × {formatCurrency(itemData.unitPrice || itemData.price || 0)} = {formatCurrency(itemData.totalAmount || 0)}
+                            {itemData.quantity || 0} × {formatCurrency(parseFloat(itemData.unitPrice || itemData.price || '0'))} = {formatCurrency(parseFloat(itemData.totalAmount || '0'))}
                           </Text>
                         </View>
                       ))}
@@ -194,7 +194,7 @@ export default function SalesReportScreen() {
                             {invoice.invoiceNumber || invoice.number || 'N/A'}
                           </Text>
                           <Text variant="bodySmall" style={styles.invoiceDetails}>
-                            {invoice.customer?.name || 'عميل'} - {formatCurrency(invoice.total || 0)}
+                            {invoice.customer?.name || 'عميل'} - {formatCurrency(parseFloat(invoice.total || '0'))}
                           </Text>
                           <View style={styles.invoiceChips}>
                             {invoice.paymentStatus && (

@@ -117,7 +117,7 @@ export default function SuppliersScreen() {
               <Card.Content>
                 <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المشتريات</Text>
                 <Text variant="headlineSmall" style={styles.summaryValue}>
-                  {formatCurrency(reportData.summary.totalPurchases || 0)}
+                  {formatCurrency(parseFloat(reportData.summary.totalPurchases || '0'))}
                 </Text>
               </Card.Content>
             </Card>
@@ -132,7 +132,7 @@ export default function SuppliersScreen() {
                     {order.orderNumber}
                   </Text>
                   <Text variant="headlineSmall" style={styles.orderTotal}>
-                    {formatCurrency(order.total)}
+                    {formatCurrency(parseFloat(order.total || '0'))}
                   </Text>
                 </View>
 
@@ -152,28 +152,28 @@ export default function SuppliersScreen() {
                       styles.statusChip,
                       {
                         backgroundColor:
-                          order.paymentStatus === 'PAID'
+                          parseFloat(order.outstanding || '0') === 0
                             ? '#10b981'
-                            : order.paymentStatus === 'PARTIAL'
+                            : parseFloat(order.paidAmount || '0') > 0
                             ? '#f97316'
                             : '#ef4444',
                       },
                     ]}
                     textStyle={styles.chipText}
                   >
-                    {order.paymentStatus === 'PAID'
+                    {parseFloat(order.outstanding || '0') === 0
                       ? 'مدفوع'
-                      : order.paymentStatus === 'PARTIAL'
+                      : parseFloat(order.paidAmount || '0') > 0
                       ? 'جزئي'
                       : 'آجل'}
                   </Chip>
-                  {order.paymentMethod && (
+                  {order.paymentStatus === 'CONFIRMED' && (
                     <Chip
                       mode="flat"
-                      style={styles.methodChip}
+                      style={[styles.statusChip, { backgroundColor: '#10b981' }]}
                       textStyle={styles.chipText}
                     >
-                      {paymentMethodLabels[order.paymentMethod] || order.paymentMethod}
+                      مؤكد
                     </Chip>
                   )}
                 </View>
