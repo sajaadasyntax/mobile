@@ -4,7 +4,7 @@ import { Card, Text, Button, Chip } from 'react-native-paper';
 import { reportingAPI } from '../services/api';
 import { formatCurrency, formatDateTime, paymentMethodLabels } from '../utils/formatters';
 
-export default function BankTransactionsScreen() {
+export default function SuppliersScreen() {
   const [reportData, setReportData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -12,6 +12,7 @@ export default function BankTransactionsScreen() {
   const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
+    // Load today's report by default
     const today = new Date().toISOString().split('T')[0];
     setStartDate(today);
     setEndDate(today);
@@ -25,11 +26,11 @@ export default function BankTransactionsScreen() {
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
 
-      const data = await reportingAPI.getBankTransactions(params);
+      const data = await reportingAPI.getSupplierReport(params);
       setReportData(data);
     } catch (error: any) {
-      console.error('Error loading bank transactions:', error);
-      setReportData({ summary: null, transactions: [] });
+      console.error('Error loading supplier report:', error);
+      setReportData({ summary: null, data: [] });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -105,55 +106,102 @@ export default function BankTransactionsScreen() {
           <View style={styles.summaryRow}>
             <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
               <Card.Content>
-                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المعاملات</Text>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الأوامر</Text>
                 <Text variant="headlineSmall" style={styles.summaryValue}>
-                  {formatCurrency(reportData.summary.total || 0)}
+                  {reportData.summary.totalOrders || 0}
                 </Text>
-                <Text variant="bodySmall" style={styles.summaryCount}>
-                  {reportData.summary.count || 0} معاملة
+              </Card.Content>
+            </Card>
+
+            <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المشتريات</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(reportData.summary.totalPurchases || 0)}
                 </Text>
               </Card.Content>
             </Card>
           </View>
         )}
         <View style={styles.reportsContainer}>
-          {reportData?.transactions?.map((transaction: any) => (
-            <Card key={transaction.id} style={styles.transactionCard}>
+          {reportData?.data?.map((order: any, index: number) => (
+            <Card key={order.orderNumber || index} style={styles.orderCard}>
               <Card.Content>
-                <View style={styles.transactionHeader}>
-                  <Text variant="titleMedium" style={styles.transactionType}>
-                    {transaction.type === 'INCOME' ? 'إيداع' : 'سحب'}
+                <View style={styles.orderHeader}>
+                  <Text variant="titleMedium" style={styles.orderNumber}>
+                    {order.orderNumber}
                   </Text>
-                  <Text variant="headlineSmall" style={[
-                    styles.amount,
-                    { color: transaction.type === 'INCOME' ? '#10b981' : '#ef4444' }
-                  ]}>
-                    {formatCurrency(transaction.amount)}
+                  <Text variant="headlineSmall" style={styles.orderTotal}>
+                    {formatCurrency(order.total)}
                   </Text>
                 </View>
 
-                <View style={styles.transactionDetails}>
+                <View style={styles.orderDetails}>
                   <Text variant="bodyMedium" style={styles.detailText}>
-                    {paymentMethodLabels[transaction.method] || transaction.method}
+                    المورد: {order.supplier || 'مورد عام'}
                   </Text>
                   <Text variant="bodySmall" style={styles.detailText}>
-                    {formatDateTime(transaction.date)}
+                    {formatDateTime(order.date)}
                   </Text>
-                  {transaction.description && (
-                    <Text variant="bodySmall" style={styles.detailText}>
-                      {transaction.description}
-                    </Text>
+                </View>
+
+                <View style={styles.chipRow}>
+                  <Chip
+                    mode="flat"
+                    style={[
+                      styles.statusChip,
+                      {
+                        backgroundColor:
+                          order.paymentStatus === 'PAID'
+                            ? '#10b981'
+                            : order.paymentStatus === 'PARTIAL'
+                            ? '#f97316'
+                            : '#ef4444',
+                      },
+                    ]}
+                    textStyle={styles.chipText}
+                  >
+                    {order.paymentStatus === 'PAID'
+                      ? 'مدفوع'
+                      : order.paymentStatus === 'PARTIAL'
+                      ? 'جزئي'
+                      : 'آجل'}
+                  </Chip>
+                  {order.paymentMethod && (
+                    <Chip
+                      mode="flat"
+                      style={styles.methodChip}
+                      textStyle={styles.chipText}
+                    >
+                      {paymentMethodLabels[order.paymentMethod] || order.paymentMethod}
+                    </Chip>
                   )}
                 </View>
+
+                {order.items && order.items.length > 0 && (
+                  <View style={styles.itemsSection}>
+                    <Text variant="titleSmall" style={styles.sectionTitle}>الأصناف</Text>
+                    {order.items.slice(0, 3).map((item: any, idx: number) => (
+                      <Text key={idx} variant="bodySmall" style={styles.itemText}>
+                        {item.itemName} ({item.quantity})
+                      </Text>
+                    ))}
+                    {order.items.length > 3 && (
+                      <Text variant="bodySmall" style={styles.moreItems}>
+                        و {order.items.length - 3} صنف آخر...
+                      </Text>
+                    )}
+                  </View>
+                )}
               </Card.Content>
             </Card>
           ))}
 
-          {(!reportData?.transactions || reportData.transactions.length === 0) && (
+          {(!reportData?.data || reportData.data.length === 0) && (
             <Card style={styles.emptyCard}>
               <Card.Content>
                 <Text variant="bodyMedium" style={styles.emptyText}>
-                  لا توجد معاملات بنكية للفترة المحددة
+                  لا توجد أوامر شراء للفترة المحددة
                 </Text>
               </Card.Content>
             </Card>
@@ -221,39 +269,70 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 4,
   },
-  summaryCount: {
-    color: 'white',
-    opacity: 0.8,
-    marginTop: 4,
-    fontSize: 11,
-  },
   reportsContainer: {
     padding: 16,
     paddingTop: 0,
   },
-  transactionCard: {
+  orderCard: {
     marginBottom: 12,
     borderRadius: 8,
+    elevation: 2,
   },
-  transactionHeader: {
+  orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
-  transactionType: {
+  orderNumber: {
     fontWeight: 'bold',
-    color: '#3b82f6',
+    color: '#2563eb',
   },
-  amount: {
+  orderTotal: {
     fontWeight: 'bold',
+    color: '#ef4444',
   },
-  transactionDetails: {
-    marginBottom: 8,
+  orderDetails: {
+    marginBottom: 12,
   },
   detailText: {
     color: '#666',
     marginBottom: 4,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  statusChip: {
+    alignSelf: 'flex-start',
+  },
+  methodChip: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#e5e7eb',
+  },
+  chipText: {
+    color: 'white',
+    fontSize: 11,
+  },
+  itemsSection: {
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  itemText: {
+    color: '#666',
+    marginBottom: 4,
+  },
+  moreItems: {
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 4,
   },
   emptyCard: {
     marginTop: 16,

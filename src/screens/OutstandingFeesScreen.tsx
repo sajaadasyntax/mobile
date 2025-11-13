@@ -16,11 +16,13 @@ export default function OutstandingFeesScreen() {
 
   const loadReports = async () => {
     try {
+      setLoading(true);
       const params: any = { period };
       const data = await reportingAPI.getOutstandingFees(params);
       setReportData(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading outstanding fees:', error);
+      setReportData({ summary: null, customers: [], suppliers: [] });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -42,76 +44,6 @@ export default function OutstandingFeesScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Period Filter */}
-      <Card style={styles.filterCard}>
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.filterTitle}>الفترة</Text>
-          <View style={styles.periodRow}>
-            <Button
-              mode={period === 'today' ? 'contained' : 'outlined'}
-              onPress={() => setPeriod('today')}
-              style={styles.periodButton}
-              compact
-            >
-              اليوم
-            </Button>
-            <Button
-              mode={period === 'week' ? 'contained' : 'outlined'}
-              onPress={() => setPeriod('week')}
-              style={styles.periodButton}
-              compact
-            >
-              أسبوع
-            </Button>
-            <Button
-              mode={period === 'month' ? 'contained' : 'outlined'}
-              onPress={() => setPeriod('month')}
-              style={styles.periodButton}
-              compact
-            >
-              شهر
-            </Button>
-            <Button
-              mode={period === 'year' ? 'contained' : 'outlined'}
-              onPress={() => setPeriod('year')}
-              style={styles.periodButton}
-              compact
-            >
-              سنة
-            </Button>
-          </View>
-        </Card.Content>
-      </Card>
-
-      {/* Summary */}
-      {reportData?.summary && (
-        <View style={styles.summaryRow}>
-          <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>ذمم العملاء</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>
-                {formatCurrency(reportData.summary.customersOwesUs || 0)}
-              </Text>
-              <Text variant="bodySmall" style={styles.summaryCount}>
-                {reportData.summary.totalCustomersOutstanding || 0} عميل
-              </Text>
-            </Card.Content>
-          </Card>
-
-          <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>ذمم الموردين</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>
-                {formatCurrency(reportData.summary.weOweSuppliers || 0)}
-              </Text>
-              <Text variant="bodySmall" style={styles.summaryCount}>
-                {reportData.summary.totalSuppliersOutstanding || 0} مورد
-              </Text>
-            </Card.Content>
-          </Card>
-        </View>
-      )}
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -119,6 +51,75 @@ export default function OutstandingFeesScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Period Filter */}
+        <Card style={styles.filterCard}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.filterTitle}>الفترة</Text>
+            <View style={styles.periodRow}>
+              <Button
+                mode={period === 'today' ? 'contained' : 'outlined'}
+                onPress={() => setPeriod('today')}
+                style={styles.periodButton}
+                compact
+              >
+                اليوم
+              </Button>
+              <Button
+                mode={period === 'week' ? 'contained' : 'outlined'}
+                onPress={() => setPeriod('week')}
+                style={styles.periodButton}
+                compact
+              >
+                أسبوع
+              </Button>
+              <Button
+                mode={period === 'month' ? 'contained' : 'outlined'}
+                onPress={() => setPeriod('month')}
+                style={styles.periodButton}
+                compact
+              >
+                شهر
+              </Button>
+              <Button
+                mode={period === 'year' ? 'contained' : 'outlined'}
+                onPress={() => setPeriod('year')}
+                style={styles.periodButton}
+                compact
+              >
+                سنة
+              </Button>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* Summary */}
+        {reportData?.summary && (
+          <View style={styles.summaryRow}>
+            <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>ذمم العملاء</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(reportData.summary.customersOwesUs || 0)}
+                </Text>
+                <Text variant="bodySmall" style={styles.summaryCount}>
+                  {reportData.summary.totalCustomersOutstanding || 0} عميل
+                </Text>
+              </Card.Content>
+            </Card>
+
+            <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>ذمم الموردين</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(reportData.summary.weOweSuppliers || 0)}
+                </Text>
+                <Text variant="bodySmall" style={styles.summaryCount}>
+                  {reportData.summary.totalSuppliersOutstanding || 0} مورد
+                </Text>
+              </Card.Content>
+            </Card>
+          </View>
+        )}
         <View style={styles.reportsContainer}>
           {/* Customers */}
           {reportData?.customers && reportData.customers.length > 0 && (
@@ -216,6 +217,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+    flexGrow: 1,
   },
   summaryRow: {
     flexDirection: 'row',

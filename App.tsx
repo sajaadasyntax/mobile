@@ -21,6 +21,9 @@ import CommissionReportScreen from './src/screens/CommissionReportScreen';
 import DailyIncomeLossScreen from './src/screens/DailyIncomeLossScreen';
 import BankTransactionsScreen from './src/screens/BankTransactionsScreen';
 import AssetsLiabilitiesScreen from './src/screens/AssetsLiabilitiesScreen';
+import ExpensesScreen from './src/screens/ExpensesScreen';
+import SuppliersScreen from './src/screens/SuppliersScreen';
+import EmployeesScreen from './src/screens/EmployeesScreen';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 const Stack = createNativeStackNavigator();
@@ -137,6 +140,21 @@ function Navigation() {
             name="Income"
             component={IncomeScreen}
             options={{ title: 'الإيرادات الأخرى' }}
+          />
+          <Stack.Screen 
+            name="Expenses"
+            component={ExpensesScreen}
+            options={{ title: 'المنصرفات' }}
+          />
+          <Stack.Screen 
+            name="Suppliers"
+            component={SuppliersScreen}
+            options={{ title: 'تقرير الموردين' }}
+          />
+          <Stack.Screen 
+            name="Employees"
+            component={EmployeesScreen}
+            options={{ title: 'الموظفين والمالية' }}
           />
         </>
       )}

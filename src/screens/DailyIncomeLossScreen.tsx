@@ -18,11 +18,13 @@ export default function DailyIncomeLossScreen() {
 
   const loadReports = async () => {
     try {
+      setLoading(true);
       const params: any = { date };
       const data = await reportingAPI.getDailyIncomeLoss(params);
       setReportData(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading daily income/loss:', error);
+      setReportData(null);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -44,79 +46,6 @@ export default function DailyIncomeLossScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Date Filter */}
-      <Card style={styles.filterCard}>
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.filterTitle}>التاريخ</Text>
-          <View style={styles.dateRow}>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                const today = new Date().toISOString().split('T')[0];
-                setDate(today);
-                loadReports();
-              }}
-              style={styles.dateButton}
-            >
-              اليوم
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                const today = new Date();
-                const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-                setDate(yesterday.toISOString().split('T')[0]);
-                loadReports();
-              }}
-              style={styles.dateButton}
-            >
-              أمس
-            </Button>
-          </View>
-          <Button
-            mode="contained"
-            onPress={loadReports}
-            style={styles.applyButton}
-          >
-            تحديث التقرير
-          </Button>
-        </Card.Content>
-      </Card>
-
-      {/* Summary */}
-      {reportData && (
-        <View style={styles.summaryRow}>
-          <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>الإيرادات</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>
-                {formatCurrency(reportData.totalIncome || 0)}
-              </Text>
-            </Card.Content>
-          </Card>
-
-          <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.summaryLabel}>المنصرفات</Text>
-              <Text variant="headlineSmall" style={styles.summaryValue}>
-                {formatCurrency(reportData.totalExpenses || 0)}
-              </Text>
-            </Card.Content>
-          </Card>
-        </View>
-      )}
-
-      {reportData && (
-        <Card style={[styles.netCard, { backgroundColor: (reportData.netIncome || 0) >= 0 ? '#10b981' : '#ef4444' }]}>
-          <Card.Content>
-            <Text variant="bodyMedium" style={styles.netLabel}>صافي الربح/الخسارة</Text>
-            <Text variant="headlineMedium" style={styles.netValue}>
-              {formatCurrency(reportData.netIncome || 0)}
-            </Text>
-          </Card.Content>
-        </Card>
-      )}
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -124,6 +53,78 @@ export default function DailyIncomeLossScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Date Filter */}
+        <Card style={styles.filterCard}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.filterTitle}>التاريخ</Text>
+            <View style={styles.dateRow}>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date().toISOString().split('T')[0];
+                  setDate(today);
+                  loadReports();
+                }}
+                style={styles.dateButton}
+              >
+                اليوم
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date();
+                  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+                  setDate(yesterday.toISOString().split('T')[0]);
+                  loadReports();
+                }}
+                style={styles.dateButton}
+              >
+                أمس
+              </Button>
+            </View>
+            <Button
+              mode="contained"
+              onPress={loadReports}
+              style={styles.applyButton}
+            >
+              تحديث التقرير
+            </Button>
+          </Card.Content>
+        </Card>
+
+        {/* Summary */}
+        {reportData && (
+          <View style={styles.summaryRow}>
+            <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>الإيرادات</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(reportData.totalIncome || 0)}
+                </Text>
+              </Card.Content>
+            </Card>
+
+            <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>المنصرفات</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(reportData.totalExpenses || 0)}
+                </Text>
+              </Card.Content>
+            </Card>
+          </View>
+        )}
+
+        {reportData && (
+          <Card style={[styles.netCard, { backgroundColor: (reportData.netIncome || 0) >= 0 ? '#10b981' : '#ef4444' }]}>
+            <Card.Content>
+              <Text variant="bodyMedium" style={styles.netLabel}>صافي الربح/الخسارة</Text>
+              <Text variant="headlineMedium" style={styles.netValue}>
+                {formatCurrency(reportData.netIncome || 0)}
+              </Text>
+            </Card.Content>
+          </Card>
+        )}
         <View style={styles.reportsContainer}>
           {/* Income */}
           {reportData?.income && reportData.income.length > 0 && (
@@ -222,6 +223,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+    flexGrow: 1,
   },
   applyButton: {
     marginTop: 8,

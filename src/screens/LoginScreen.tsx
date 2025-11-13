@@ -41,9 +41,6 @@ export default function LoginScreen() {
         <Surface style={styles.card} elevation={4}>
           {/* Logo/Header */}
           <View style={styles.header}>
-            <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.primary }]}>
-              معمورة
-            </Text>
             <Text variant="titleMedium" style={styles.subtitle}>
               نظام إدارة المخزون
             </Text>

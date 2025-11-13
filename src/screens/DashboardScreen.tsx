@@ -230,6 +230,32 @@ export default function DashboardScreen({ navigation }: any) {
           <Card.Content>
             <Button
               mode="contained"
+              icon="truck-delivery"
+              onPress={() => navigation.navigate('Suppliers')}
+              style={styles.actionButton}
+            >
+              تقرير الموردين
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="account-group"
+              onPress={() => navigation.navigate('Employees')}
+              style={styles.actionButton}
+            >
+              الموظفين والمالية
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
               icon="cash"
               onPress={() => navigation.navigate('LiquidCash')}
               style={styles.actionButton}
@@ -274,6 +300,19 @@ export default function DashboardScreen({ navigation }: any) {
               style={styles.actionButton}
             >
               الإيرادات الأخرى
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              icon="cash-minus"
+              onPress={() => navigation.navigate('Expenses')}
+              style={styles.actionButton}
+            >
+              المنصرفات
             </Button>
           </Card.Content>
         </Card>

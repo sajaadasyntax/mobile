@@ -15,10 +15,12 @@ export default function AssetsLiabilitiesScreen() {
 
   const loadReports = async () => {
     try {
+      setLoading(true);
       const data = await reportingAPI.getAssetsLiabilities();
       setReportData(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading assets & liabilities:', error);
+      setReportData(null);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -193,6 +195,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+    flexGrow: 1,
   },
 });
 

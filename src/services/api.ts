@@ -140,6 +140,16 @@ export const reportingAPI = {
     return response.data;
   },
 
+  getSupplierReport: async (params?: any) => {
+    const response = await api.get('/accounting/supplier-report', { params });
+    return response.data;
+  },
+
+  getEmployees: async () => {
+    const response = await api.get('/employees');
+    return response.data;
+  },
+
   getOutstandingFees: async (params?: any) => {
     const response = await api.get('/accounting/outstanding-fees', { params });
     return response.data;
