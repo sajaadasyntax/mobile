@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authAPI } from '../services/api';
+import { sanitizeErrorMessage } from '../utils/formatters';
 
 interface User {
   id: string;
@@ -59,7 +60,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
       setUser(data.user);
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || error.message || 'فشل تسجيل الدخول');
+      const errorMessage = error.response?.data?.error || error.message || 'فشل تسجيل الدخول';
+      throw new Error(sanitizeErrorMessage(errorMessage));
     }
   };
 

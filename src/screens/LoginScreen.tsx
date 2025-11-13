@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text, Surface, useTheme } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
+import { sanitizeErrorMessage } from '../utils/formatters';
 
 export default function LoginScreen() {
   const theme = useTheme();
@@ -24,7 +25,8 @@ export default function LoginScreen() {
     try {
       await login(username, password);
     } catch (err: any) {
-      setError(err.message || 'فشل تسجيل الدخول');
+      const errorMessage = err.message || 'فشل تسجيل الدخول';
+      setError(sanitizeErrorMessage(errorMessage));
     } finally {
       setLoading(false);
     }

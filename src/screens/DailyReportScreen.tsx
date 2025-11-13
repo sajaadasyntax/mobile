@@ -6,10 +6,11 @@ import {
   ScrollView,
   ActivityIndicator,
   TextInput,
+  Alert,
 } from 'react-native';
 import Constants from 'expo-constants';
 import { reportingAPI } from '../services/api';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import { formatCurrency, formatDate, sanitizeErrorMessage } from '../utils/formatters';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:4000/api';
 
@@ -70,7 +71,8 @@ export default function DailyReportScreen() {
       const data = await reportingAPI.getDailyReport(date);
       setReportData(data);
     } catch (error: any) {
-      Alert.alert('خطأ', error.message || 'فشل تحميل التقرير اليومي');
+      const errorMessage = error.message || 'فشل تحميل التقرير اليومي';
+      Alert.alert('خطأ', sanitizeErrorMessage(errorMessage));
     } finally {
       setLoading(false);
     }

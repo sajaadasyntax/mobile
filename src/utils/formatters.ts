@@ -89,3 +89,27 @@ export const customerTypeLabels: Record<string, string> = {
   AGENT: 'وكيل',
 };
 
+/**
+ * Sanitizes error messages by replacing "ليس" with appropriate alternatives
+ */
+export const sanitizeErrorMessage = (errorMessage: string): string => {
+  if (!errorMessage) return errorMessage;
+  
+  // Map specific error messages containing "ليس" to cleaner versions
+  const errorMappings: Record<string, string> = {
+    'ليس لديك صلاحية للوصول': 'لا توجد لديك صلاحية للوصول',
+    'ليس لديك صلاحية للوصول لهذا المخزن': 'لا توجد لديك صلاحية للوصول لهذا المخزن',
+    'ليست لديك صلاحية نقل أصناف من هذا المخزن لهذا القسم': 'لا توجد لديك صلاحية نقل أصناف من هذا المخزن لهذا القسم',
+    'هذا المنصرف ليس دينًا': 'هذا المنصرف لا يعتبر دينًا',
+    'هذا الإيراد ليس دينًا': 'هذا الإيراد لا يعتبر دينًا',
+  };
+
+  // Check for exact matches first
+  if (errorMappings[errorMessage]) {
+    return errorMappings[errorMessage];
+  }
+
+  // Replace "ليس" with "لا" in general cases
+  return errorMessage.replace(/ليس/gi, 'لا').replace(/ليست/gi, 'لا توجد');
+};
+
