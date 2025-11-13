@@ -105,49 +105,112 @@ export default function BankTransactionsScreen() {
           <View style={styles.summaryRow}>
             <Card style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
               <Card.Content>
-                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المعاملات</Text>
+                <Text variant="bodySmall" style={styles.summaryLabel}>صافي الرصيد</Text>
                 <Text variant="headlineSmall" style={styles.summaryValue}>
-                  {formatCurrency(reportData.summary.total || 0)}
+                  {formatCurrency(parseFloat(reportData.summary.net?.total || '0'))}
                 </Text>
                 <Text variant="bodySmall" style={styles.summaryCount}>
                   {reportData.summary.count || 0} معاملة
                 </Text>
               </Card.Content>
             </Card>
+            <Card style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي الإيرادات</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(parseFloat(reportData.summary.income?.total || '0'))}
+                </Text>
+              </Card.Content>
+            </Card>
+            <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المنصرفات</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(parseFloat(reportData.summary.expenses?.total || '0'))}
+                </Text>
+              </Card.Content>
+            </Card>
           </View>
         )}
         <View style={styles.reportsContainer}>
-          {reportData?.transactions?.map((transaction: any) => (
-            <Card key={transaction.id} style={styles.transactionCard}>
-              <Card.Content>
-                <View style={styles.transactionHeader}>
-                  <Text variant="titleMedium" style={styles.transactionType}>
-                    {transaction.type === 'INCOME' ? 'إيداع' : 'سحب'}
-                  </Text>
-                  <Text variant="headlineSmall" style={[
-                    styles.amount,
-                    { color: transaction.type === 'INCOME' ? '#10b981' : '#ef4444' }
-                  ]}>
-                    {formatCurrency(transaction.amount)}
-                  </Text>
-                </View>
-
-                <View style={styles.transactionDetails}>
-                  <Text variant="bodyMedium" style={styles.detailText}>
-                    {paymentMethodLabels[transaction.method] || transaction.method}
-                  </Text>
-                  <Text variant="bodySmall" style={styles.detailText}>
-                    {formatDateTime(transaction.date)}
-                  </Text>
-                  {transaction.description && (
-                    <Text variant="bodySmall" style={styles.detailText}>
-                      {transaction.description}
+          {reportData?.transactions?.map((transaction: any) => {
+            // Determine if it's income or expense based on transaction type
+            const isIncome = transaction.type === 'SALES_PAYMENT';
+            const isExpense = ['PROCUREMENT_PAYMENT', 'EXPENSE', 'SALARY', 'ADVANCE'].includes(transaction.type);
+            
+            return (
+              <Card key={transaction.id} style={styles.transactionCard}>
+                <Card.Content>
+                  <View style={styles.transactionHeader}>
+                    <View>
+                      <Text variant="titleMedium" style={styles.transactionType}>
+                        {transaction.typeLabel || transaction.type}
+                      </Text>
+                      <Text variant="bodySmall" style={styles.detailText}>
+                        {paymentMethodLabels[transaction.method] || transaction.method}
+                      </Text>
+                    </View>
+                    <Text variant="headlineSmall" style={[
+                      styles.amount,
+                      { color: isIncome ? '#10b981' : isExpense ? '#ef4444' : '#3b82f6' }
+                    ]}>
+                      {isIncome ? '+' : isExpense ? '-' : ''}{formatCurrency(parseFloat(transaction.amount || '0'))}
                     </Text>
-                  )}
-                </View>
-              </Card.Content>
-            </Card>
-          ))}
+                  </View>
+
+                  <View style={styles.transactionDetails}>
+                    <Text variant="bodySmall" style={styles.detailText}>
+                      {formatDateTime(transaction.date)}
+                    </Text>
+                    {transaction.recordedBy && (
+                      <Text variant="bodySmall" style={styles.detailText}>
+                        سجل بواسطة: {transaction.recordedBy}
+                      </Text>
+                    )}
+                    {transaction.details && (
+                      <>
+                        {transaction.details.invoiceNumber && (
+                          <Text variant="bodySmall" style={styles.detailText}>
+                            فاتورة: {transaction.details.invoiceNumber}
+                          </Text>
+                        )}
+                        {transaction.details.orderNumber && (
+                          <Text variant="bodySmall" style={styles.detailText}>
+                            أمر شراء: {transaction.details.orderNumber}
+                          </Text>
+                        )}
+                        {transaction.details.customer && (
+                          <Text variant="bodySmall" style={styles.detailText}>
+                            العميل: {transaction.details.customer}
+                          </Text>
+                        )}
+                        {transaction.details.supplier && (
+                          <Text variant="bodySmall" style={styles.detailText}>
+                            المورد: {transaction.details.supplier}
+                          </Text>
+                        )}
+                        {transaction.details.employee && (
+                          <Text variant="bodySmall" style={styles.detailText}>
+                            الموظف: {transaction.details.employee}
+                          </Text>
+                        )}
+                        {transaction.details.description && (
+                          <Text variant="bodySmall" style={styles.detailText}>
+                            {transaction.details.description}
+                          </Text>
+                        )}
+                        {transaction.details.fromMethod && transaction.details.toMethod && (
+                          <Text variant="bodySmall" style={styles.detailText}>
+                            من {paymentMethodLabels[transaction.details.fromMethod]} إلى {paymentMethodLabels[transaction.details.toMethod]}
+                          </Text>
+                        )}
+                      </>
+                    )}
+                  </View>
+                </Card.Content>
+              </Card>
+            );
+          })}
 
           {(!reportData?.transactions || reportData.transactions.length === 0) && (
             <Card style={styles.emptyCard}>
