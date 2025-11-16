@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, RefreshControl, TextInput } from 'react-native';
 import { Card, Text, Button } from 'react-native-paper';
 import { reportingAPI } from '../services/api';
 import { formatCurrency, formatDateTime } from '../utils/formatters';
@@ -13,8 +13,13 @@ export default function DailyIncomeLossScreen() {
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     setDate(today);
-    loadReports();
   }, []);
+
+  useEffect(() => {
+    if (date) {
+      loadReports();
+    }
+  }, [date]);
 
   const loadReports = async () => {
     try {
@@ -57,15 +62,29 @@ export default function DailyIncomeLossScreen() {
         <Card style={styles.filterCard}>
           <Card.Content>
             <Text variant="titleMedium" style={styles.filterTitle}>التاريخ</Text>
+            
+            <View style={styles.dateInputContainer}>
+              <View style={styles.dateInputRow}>
+                <Text variant="bodySmall" style={styles.dateLabel}>التاريخ:</Text>
+                <TextInput
+                  style={styles.dateInput}
+                  value={date}
+                  onChangeText={setDate}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor="#999"
+                />
+              </View>
+            </View>
+
             <View style={styles.dateRow}>
               <Button
                 mode="outlined"
                 onPress={() => {
                   const today = new Date().toISOString().split('T')[0];
                   setDate(today);
-                  loadReports();
                 }}
                 style={styles.dateButton}
+                compact
               >
                 اليوم
               </Button>
@@ -75,20 +94,32 @@ export default function DailyIncomeLossScreen() {
                   const today = new Date();
                   const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
                   setDate(yesterday.toISOString().split('T')[0]);
-                  loadReports();
                 }}
                 style={styles.dateButton}
+                compact
               >
                 أمس
               </Button>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date();
+                  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                  setDate(weekAgo.toISOString().split('T')[0]);
+                }}
+                style={styles.dateButton}
+                compact
+              >
+                آخر أسبوع
+              </Button>
             </View>
-            <Button
-              mode="contained"
-              onPress={loadReports}
-              style={styles.applyButton}
-            >
-              تحديث التقرير
-            </Button>
+            
+            <Text variant="bodySmall" style={styles.selectedFilterText}>
+              {date 
+                ? `التاريخ المحدد: ${date}`
+                : 'يرجى تحديد التاريخ'
+              }
+            </Text>
           </Card.Content>
         </Card>
 
@@ -208,6 +239,28 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontWeight: 'bold',
   },
+  dateInputContainer: {
+    marginBottom: 12,
+  },
+  dateInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+  dateLabel: {
+    minWidth: 80,
+    fontWeight: '500',
+  },
+  dateInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    padding: 10,
+    backgroundColor: '#fff',
+    fontSize: 14,
+  },
   dateRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -216,7 +269,13 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     flex: 1,
-    minWidth: '45%',
+    minWidth: '30%',
+  },
+  selectedFilterText: {
+    marginTop: 8,
+    textAlign: 'center',
+    color: '#666',
+    fontStyle: 'italic',
   },
   scrollView: {
     flex: 1,

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import Constants from 'expo-constants';
 import { reportingAPI } from '../services/api';
@@ -60,27 +61,35 @@ interface DailyReportData {
 
 export default function DailyReportScreen() {
   const [reportData, setReportData] = useState<DailyReportData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
 
   const loadDailyReport = async (date?: string) => {
-    setLoading(true);
     try {
+      setLoading(true);
       const data = await reportingAPI.getDailyReport(date);
       setReportData(data);
     } catch (error: any) {
       const errorMessage = error.message || 'فشل تحميل التقرير اليومي';
       Alert.alert('خطأ', sanitizeErrorMessage(errorMessage));
+      setReportData(null);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
     loadDailyReport(selectedDate);
   }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadDailyReport(selectedDate);
+  };
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
@@ -109,6 +118,9 @@ export default function DailyReportScreen() {
     <ScrollView 
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <View style={styles.header}>
         <Text style={styles.title}>التقرير اليومي</Text>
