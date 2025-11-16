@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, RefreshControl, TextInput, Alert } from 'react-native';
 import { Card, Text, Button, Chip } from 'react-native-paper';
 import { reportingAPI } from '../services/api';
-import { formatCurrency, formatDateTime, paymentMethodLabels } from '../utils/formatters';
+import { formatCurrency, formatDateTime, paymentMethodLabels, sanitizeErrorMessage } from '../utils/formatters';
 
 export default function CustomerReportScreen() {
   const [reportData, setReportData] = useState<any>(null);
@@ -12,12 +12,16 @@ export default function CustomerReportScreen() {
   const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
-    // Load today's report by default
     const today = new Date().toISOString().split('T')[0];
     setStartDate(today);
     setEndDate(today);
-    loadReports();
   }, []);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      loadReports();
+    }
+  }, [startDate, endDate]);
 
   const loadReports = async () => {
     try {
@@ -30,6 +34,12 @@ export default function CustomerReportScreen() {
       setReportData(data);
     } catch (error: any) {
       console.error('Error loading customer report:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'فشل تحميل البيانات';
+      if (error.response?.status === 403 || error.response?.status === 401) {
+        Alert.alert('خطأ في الصلاحيات', sanitizeErrorMessage(errorMessage));
+      } else {
+        Alert.alert('خطأ', sanitizeErrorMessage(errorMessage));
+      }
       setReportData({ summary: null, data: [] });
     } finally {
       setLoading(false);
@@ -63,6 +73,30 @@ export default function CustomerReportScreen() {
         <Card style={styles.filterCard}>
           <Card.Content>
             <Text variant="titleMedium" style={styles.filterTitle}>الفترة الزمنية</Text>
+            
+            <View style={styles.dateInputContainer}>
+              <View style={styles.dateInputRow}>
+                <Text variant="bodySmall" style={styles.dateLabel}>من تاريخ:</Text>
+                <TextInput
+                  style={styles.dateInput}
+                  value={startDate}
+                  onChangeText={setStartDate}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor="#999"
+                />
+              </View>
+              <View style={styles.dateInputRow}>
+                <Text variant="bodySmall" style={styles.dateLabel}>إلى تاريخ:</Text>
+                <TextInput
+                  style={styles.dateInput}
+                  value={endDate}
+                  onChangeText={setEndDate}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor="#999"
+                />
+              </View>
+            </View>
+
             <View style={styles.dateRow}>
               <Button
                 mode="outlined"
@@ -70,9 +104,9 @@ export default function CustomerReportScreen() {
                   const today = new Date().toISOString().split('T')[0];
                   setStartDate(today);
                   setEndDate(today);
-                  loadReports();
                 }}
                 style={styles.dateButton}
+                compact
               >
                 اليوم
               </Button>
@@ -84,20 +118,46 @@ export default function CustomerReportScreen() {
                   const dateStr = yesterday.toISOString().split('T')[0];
                   setStartDate(dateStr);
                   setEndDate(dateStr);
-                  loadReports();
                 }}
                 style={styles.dateButton}
+                compact
               >
                 أمس
               </Button>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date();
+                  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                  setStartDate(weekAgo.toISOString().split('T')[0]);
+                  setEndDate(today.toISOString().split('T')[0]);
+                }}
+                style={styles.dateButton}
+                compact
+              >
+                آخر أسبوع
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  const today = new Date();
+                  const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                  setStartDate(monthAgo.toISOString().split('T')[0]);
+                  setEndDate(today.toISOString().split('T')[0]);
+                }}
+                style={styles.dateButton}
+                compact
+              >
+                آخر شهر
+              </Button>
             </View>
-            <Button
-              mode="contained"
-              onPress={loadReports}
-              style={styles.applyButton}
-            >
-              تحديث التقرير
-            </Button>
+            
+            <Text variant="bodySmall" style={styles.selectedFilterText}>
+              {startDate && endDate 
+                ? `من ${startDate} إلى ${endDate}`
+                : 'يرجى تحديد الفترة الزمنية'
+              }
+            </Text>
           </Card.Content>
         </Card>
 
@@ -230,6 +290,28 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontWeight: 'bold',
   },
+  dateInputContainer: {
+    marginBottom: 12,
+  },
+  dateInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+  dateLabel: {
+    minWidth: 80,
+    fontWeight: '500',
+  },
+  dateInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    padding: 10,
+    backgroundColor: '#fff',
+    fontSize: 14,
+  },
   dateRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -238,7 +320,13 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     flex: 1,
-    minWidth: '45%',
+    minWidth: '22%',
+  },
+  selectedFilterText: {
+    marginTop: 8,
+    textAlign: 'center',
+    color: '#666',
+    fontStyle: 'italic',
   },
   scrollView: {
     flex: 1,

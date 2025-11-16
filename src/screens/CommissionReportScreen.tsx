@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, TextInput } from 'react-native';
+import { View, StyleSheet, ScrollView, RefreshControl, TextInput, Alert } from 'react-native';
 import { Card, Text, Button } from 'react-native-paper';
 import { reportingAPI } from '../services/api';
-import { formatCurrency, formatDateTime } from '../utils/formatters';
+import { formatCurrency, formatDateTime, sanitizeErrorMessage } from '../utils/formatters';
 
 export default function CommissionReportScreen() {
   const [reportData, setReportData] = useState<any>(null);
@@ -34,7 +34,13 @@ export default function CommissionReportScreen() {
       setReportData(data);
     } catch (error: any) {
       console.error('Error loading commission report:', error);
-      setReportData({ summary: null, data: [] });
+      const errorMessage = error.response?.data?.error || error.message || 'فشل تحميل البيانات';
+      if (error.response?.status === 403 || error.response?.status === 401) {
+        Alert.alert('خطأ في الصلاحيات', sanitizeErrorMessage(errorMessage));
+      } else {
+        Alert.alert('خطأ', sanitizeErrorMessage(errorMessage));
+      }
+      setReportData({ summary: null, rows: [] });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -172,7 +178,7 @@ export default function CommissionReportScreen() {
           </View>
         )}
         <View style={styles.reportsContainer}>
-          {reportData?.data?.map((commission: any) => (
+          {reportData?.rows?.map((commission: any) => (
             <Card key={commission.id} style={styles.commissionCard}>
               <Card.Content>
                 <View style={styles.commissionHeader}>
@@ -212,7 +218,7 @@ export default function CommissionReportScreen() {
             </Card>
           ))}
 
-          {(!reportData?.data || reportData.data.length === 0) && (
+          {(!reportData?.rows || reportData.rows.length === 0) && (
             <Card style={styles.emptyCard}>
               <Card.Content>
                 <Text variant="bodyMedium" style={styles.emptyText}>

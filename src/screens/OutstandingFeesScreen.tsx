@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, TextInput } from 'react-native';
+import { View, StyleSheet, ScrollView, RefreshControl, TextInput, Alert } from 'react-native';
 import { Card, Text, Button, Chip } from 'react-native-paper';
 import { reportingAPI } from '../services/api';
-import { formatCurrency, formatDateTime } from '../utils/formatters';
+import { formatCurrency, formatDateTime, sanitizeErrorMessage } from '../utils/formatters';
 
 export default function OutstandingFeesScreen() {
   const [reportData, setReportData] = useState<any>(null);
@@ -33,6 +33,12 @@ export default function OutstandingFeesScreen() {
       setReportData(data);
     } catch (error: any) {
       console.error('Error loading outstanding fees:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'فشل تحميل البيانات';
+      if (error.response?.status === 403 || error.response?.status === 401) {
+        Alert.alert('خطأ في الصلاحيات', sanitizeErrorMessage(errorMessage));
+      } else {
+        Alert.alert('خطأ', sanitizeErrorMessage(errorMessage));
+      }
       setReportData({ summary: null, customers: [], suppliers: [] });
     } finally {
       setLoading(false);
@@ -204,7 +210,7 @@ export default function OutstandingFeesScreen() {
               <Card.Content>
                 <Text variant="bodySmall" style={styles.summaryLabel}>ذمم العملاء</Text>
                 <Text variant="headlineSmall" style={styles.summaryValue}>
-                  {formatCurrency(reportData.summary.customersOwesUs || 0)}
+                  {formatCurrency(parseFloat(reportData.summary.customersOwesUs || '0'))}
                 </Text>
                 <Text variant="bodySmall" style={styles.summaryCount}>
                   {reportData.summary.totalCustomersOutstanding || 0} عميل
@@ -216,7 +222,7 @@ export default function OutstandingFeesScreen() {
               <Card.Content>
                 <Text variant="bodySmall" style={styles.summaryLabel}>ذمم الموردين</Text>
                 <Text variant="headlineSmall" style={styles.summaryValue}>
-                  {formatCurrency(reportData.summary.weOweSuppliers || 0)}
+                  {formatCurrency(parseFloat(reportData.summary.weOweSuppliers || '0'))}
                 </Text>
                 <Text variant="bodySmall" style={styles.summaryCount}>
                   {reportData.summary.totalSuppliersOutstanding || 0} مورد
@@ -230,20 +236,28 @@ export default function OutstandingFeesScreen() {
           {reportData?.customers && reportData.customers.length > 0 && (
             <>
               <Text variant="titleLarge" style={styles.sectionHeader}>العملاء</Text>
-              {reportData.customers.map((customer: any) => (
-                <Card key={customer.id} style={styles.customerCard}>
+              {reportData.customers.map((invoice: any, index: number) => (
+                <Card key={invoice.invoiceNumber || index} style={styles.customerCard}>
                   <Card.Content>
                     <View style={styles.customerHeader}>
                       <Text variant="titleMedium" style={styles.customerName}>
-                        {customer.name}
+                        {invoice.customer || 'بدون عميل'}
                       </Text>
                       <Text variant="headlineSmall" style={styles.outstandingAmount}>
-                        {formatCurrency(customer.outstanding)}
+                        {formatCurrency(parseFloat(invoice.outstanding || '0'))}
                       </Text>
                     </View>
                     <Text variant="bodySmall" style={styles.customerDetails}>
-                      {customer.invoiceCount} فاتورة
+                      فاتورة: {invoice.invoiceNumber}
                     </Text>
+                    <Text variant="bodySmall" style={styles.customerDetails}>
+                      الإجمالي: {formatCurrency(parseFloat(invoice.total || '0'))} | المدفوع: {formatCurrency(parseFloat(invoice.paidAmount || '0'))}
+                    </Text>
+                    {invoice.inventory && (
+                      <Text variant="bodySmall" style={styles.customerDetails}>
+                        المخزن: {invoice.inventory}
+                      </Text>
+                    )}
                   </Card.Content>
                 </Card>
               ))}
@@ -254,20 +268,28 @@ export default function OutstandingFeesScreen() {
           {reportData?.suppliers && reportData.suppliers.length > 0 && (
             <>
               <Text variant="titleLarge" style={styles.sectionHeader}>الموردين</Text>
-              {reportData.suppliers.map((supplier: any) => (
-                <Card key={supplier.id} style={styles.supplierCard}>
+              {reportData.suppliers.map((order: any, index: number) => (
+                <Card key={order.orderNumber || index} style={styles.supplierCard}>
                   <Card.Content>
                     <View style={styles.supplierHeader}>
                       <Text variant="titleMedium" style={styles.supplierName}>
-                        {supplier.name}
+                        {order.supplier || 'غير محدد'}
                       </Text>
                       <Text variant="headlineSmall" style={styles.outstandingAmount}>
-                        {formatCurrency(supplier.outstanding)}
+                        {formatCurrency(parseFloat(order.outstanding || '0'))}
                       </Text>
                     </View>
                     <Text variant="bodySmall" style={styles.supplierDetails}>
-                      {supplier.orderCount} أمر شراء
+                      أمر شراء: {order.orderNumber}
                     </Text>
+                    <Text variant="bodySmall" style={styles.supplierDetails}>
+                      الإجمالي: {formatCurrency(parseFloat(order.total || '0'))} | المدفوع: {formatCurrency(parseFloat(order.paidAmount || '0'))}
+                    </Text>
+                    {order.inventory && (
+                      <Text variant="bodySmall" style={styles.supplierDetails}>
+                        المخزن: {order.inventory}
+                      </Text>
+                    )}
                   </Card.Content>
                 </Card>
               ))}

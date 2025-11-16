@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, TextInput } from 'react-native';
+import { View, StyleSheet, ScrollView, RefreshControl, TextInput, Alert } from 'react-native';
 import { Card, Text, Button, Chip } from 'react-native-paper';
 import { reportingAPI } from '../services/api';
-import { formatCurrency, formatDateTime, paymentMethodLabels } from '../utils/formatters';
+import { formatCurrency, formatDateTime, paymentMethodLabels, sanitizeErrorMessage } from '../utils/formatters';
 
 export default function BankTransactionsScreen() {
   const [reportData, setReportData] = useState<any>(null);
@@ -34,6 +34,12 @@ export default function BankTransactionsScreen() {
       setReportData(data);
     } catch (error: any) {
       console.error('Error loading bank transactions:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'فشل تحميل البيانات';
+      if (error.response?.status === 403 || error.response?.status === 401) {
+        Alert.alert('خطأ في الصلاحيات', sanitizeErrorMessage(errorMessage));
+      } else {
+        Alert.alert('خطأ', sanitizeErrorMessage(errorMessage));
+      }
       setReportData({ summary: null, transactions: [] });
     } finally {
       setLoading(false);
