@@ -165,19 +165,6 @@ export default function DashboardScreen({ navigation }: any) {
           <Card.Content>
             <Button
               mode="contained"
-              icon="file-document"
-              onPress={() => navigation.navigate('AuditLogs')}
-              style={styles.actionButton}
-            >
-              سجلات المراجعة
-            </Button>
-          </Card.Content>
-        </Card>
-
-        <Card style={styles.actionCard}>
-          <Card.Content>
-            <Button
-              mode="contained"
               icon="chart-bar"
               onPress={() => navigation.navigate('BalanceSheet')}
               style={styles.actionButton}

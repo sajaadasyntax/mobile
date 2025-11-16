@@ -1,6 +1,6 @@
 export const formatCurrency = (amount: number | string): string => {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('ar-SD', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'SDG',
     minimumFractionDigits: 0,
@@ -10,7 +10,7 @@ export const formatCurrency = (amount: number | string): string => {
 
 export const formatNumber = (num: number | string): string => {
   const number = typeof num === 'string' ? parseFloat(num) : num;
-  return new Intl.NumberFormat('ar-SD', {
+  return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(number);
