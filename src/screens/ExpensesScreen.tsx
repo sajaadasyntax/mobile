@@ -4,6 +4,7 @@ import { Card, Text, DataTable, Chip } from 'react-native-paper';
 import { reportingAPI } from '../services/api';
 import { formatCurrency, formatDateTime } from '../utils/formatters';
 
+
 interface ExpenseItem {
   id: string;
   type: 'EXPENSE' | 'SALARY' | 'ADVANCE';
