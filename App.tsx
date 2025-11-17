@@ -6,7 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import LoginScreen from './src/screens/LoginScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
-import AuditLogsScreen from './src/screens/AuditLogsScreen';
 import BalanceSheetScreen from './src/screens/BalanceSheetScreen';
 import SalesReportScreen from './src/screens/SalesReportScreen';
 import ProcurementReportScreen from './src/screens/ProcurementReportScreen';
@@ -70,11 +69,6 @@ function Navigation() {
             name="Inventory" 
             component={InventoryScreen}
             options={{ title: 'المخازن والمخزون' }}
-          />
-          <Stack.Screen 
-            name="AuditLogs" 
-            component={AuditLogsScreen}
-            options={{ title: 'سجلات المراجعة' }}
           />
           <Stack.Screen 
             name="BalanceSheet" 

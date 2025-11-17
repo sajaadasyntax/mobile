@@ -51,10 +51,13 @@ export default function BalanceSheetScreen() {
   const revenue = parseFloat(data.sales?.total || '0');
   const collected = parseFloat(data.sales?.received || '0');
   const receivables = parseFloat(data.sales?.debt || '0');
+  const otherIncome = parseFloat(data.income?.total || '0');
+  const totalRevenue = collected + otherIncome;
   const costs = parseFloat(data.procurement?.total || '0') + parseFloat(data.expenses?.total || '0');
-  const netProfit = revenue - costs;
+  const netProfit = totalRevenue - costs;
   const profitMargin = revenue > 0 ? (netProfit / revenue) * 100 : 0;
   const openingBalance = parseFloat(data.balance?.opening || '0');
+  const netBalance = parseFloat(data.balance?.net || '0');
 
   return (
     <ScrollView
@@ -88,6 +91,19 @@ export default function BalanceSheetScreen() {
               <Text>المستحقات (ذمم)</Text>
               <Text style={[styles.amount, styles.warning]}>{formatCurrency(receivables)}</Text>
             </View>
+
+            {otherIncome > 0 && (
+              <>
+                <View style={styles.row}>
+                  <Text>الإيرادات الأخرى</Text>
+                  <Text style={[styles.amount, styles.positive]}>{formatCurrency(otherIncome)}</Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.bold}>إجمالي الإيرادات</Text>
+                  <Text style={[styles.amount, styles.bold, styles.positive]}>{formatCurrency(totalRevenue)}</Text>
+                </View>
+              </>
+            )}
 
             <Divider style={styles.divider} />
 
@@ -139,7 +155,7 @@ export default function BalanceSheetScreen() {
             
             <View style={styles.row}>
               <Text>الرصيد النقدي (كاش + بنك)</Text>
-              <Text style={styles.amount}>{formatCurrency(collected)}</Text>
+              <Text style={styles.amount}>{formatCurrency(netBalance)}</Text>
             </View>
             
             <View style={styles.row}>
@@ -149,7 +165,7 @@ export default function BalanceSheetScreen() {
             
             <View style={styles.row}>
               <Text style={styles.bold}>إجمالي الأصول</Text>
-              <Text style={[styles.amount, styles.bold]}>{formatCurrency(collected + receivables)}</Text>
+              <Text style={[styles.amount, styles.bold]}>{formatCurrency(netBalance + receivables)}</Text>
             </View>
 
             <Divider style={styles.divider} />
@@ -211,7 +227,7 @@ export default function BalanceSheetScreen() {
           <Card.Content>
             <Text variant="bodySmall" style={styles.summaryLabel}>الرصيد النقدي</Text>
             <Text variant="headlineSmall" style={styles.summaryValue}>
-              {formatCurrency(collected)}
+              {formatCurrency(netBalance)}
             </Text>
           </Card.Content>
         </Card>

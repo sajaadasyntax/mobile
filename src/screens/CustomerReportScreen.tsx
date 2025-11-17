@@ -27,8 +27,16 @@ export default function CustomerReportScreen() {
     try {
       setLoading(true);
       const params: any = {};
-      if (startDate) params.startDate = startDate;
-      if (endDate) params.endDate = endDate;
+      if (startDate) {
+        // Ensure date is in YYYY-MM-DD format
+        const date = new Date(startDate);
+        params.startDate = date.toISOString().split('T')[0];
+      }
+      if (endDate) {
+        // Ensure date is in YYYY-MM-DD format
+        const date = new Date(endDate);
+        params.endDate = date.toISOString().split('T')[0];
+      }
 
       const data = await reportingAPI.getCustomerReport(params);
       setReportData(data);
@@ -181,6 +189,24 @@ export default function CustomerReportScreen() {
                 </Text>
               </Card.Content>
             </Card>
+
+            <Card style={[styles.summaryCard, { backgroundColor: '#f97316' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المدفوع</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(parseFloat(reportData.summary.totalPaid || '0'))}
+                </Text>
+              </Card.Content>
+            </Card>
+
+            <Card style={[styles.summaryCard, { backgroundColor: '#ef4444' }]}>
+              <Card.Content>
+                <Text variant="bodySmall" style={styles.summaryLabel}>إجمالي المتبقي</Text>
+                <Text variant="headlineSmall" style={styles.summaryValue}>
+                  {formatCurrency(parseFloat(reportData.summary.totalOutstanding || '0'))}
+                </Text>
+              </Card.Content>
+            </Card>
           </View>
         )}
         <View style={styles.reportsContainer}>
@@ -198,11 +224,21 @@ export default function CustomerReportScreen() {
 
                 <View style={styles.invoiceDetails}>
                   <Text variant="bodyMedium" style={styles.detailText}>
-                    العميل: {invoice.customer || 'عميل عام'}
+                    العميل: {invoice.customer || 'غير محدد'}
                   </Text>
+                  {invoice.customerType && (
+                    <Text variant="bodySmall" style={styles.detailText}>
+                      النوع: {invoice.customerType === 'WHOLESALE' ? 'جملة' : invoice.customerType === 'RETAIL' ? 'قطاعي' : invoice.customerType === 'AGENT' ? 'وكيل' : invoice.customerType}
+                    </Text>
+                  )}
                   <Text variant="bodySmall" style={styles.detailText}>
                     {formatDateTime(invoice.date)}
                   </Text>
+                  {invoice.outstanding && parseFloat(invoice.outstanding) > 0 && (
+                    <Text variant="bodySmall" style={[styles.detailText, { color: '#ef4444', fontWeight: 'bold' }]}>
+                      المتبقي: {formatCurrency(parseFloat(invoice.outstanding))}
+                    </Text>
+                  )}
                 </View>
 
                 <View style={styles.chipRow}>
@@ -340,12 +376,14 @@ const styles = StyleSheet.create({
   },
   summaryRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
     padding: 16,
     paddingTop: 0,
   },
   summaryCard: {
     flex: 1,
+    minWidth: '45%',
     borderRadius: 8,
   },
   summaryLabel: {
